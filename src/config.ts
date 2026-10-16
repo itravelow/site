@@ -13,6 +13,8 @@ export function waLink(message: string): string {
 export const SERVICES = [
   {
     slug: 'traslados',
+    image: '/img/traslado-480.webp',
+    alt: 'Van blanca por la carretera de palmeras hacia un hotel de Bávaro',
     name: 'Traslado aeropuerto ↔ hotel',
     from: 35,
     unit: 'por vehículo, hasta 4 personas',
@@ -23,6 +25,8 @@ export const SERVICES = [
   },
   {
     slug: 'buggies',
+    image: '/img/buggies-480.webp',
+    alt: 'Buggy levantando polvo rojo en un camino de tierra de Macao',
     name: 'Buggies en Macao',
     from: 50,
     unit: 'por persona',
@@ -33,6 +37,8 @@ export const SERVICES = [
   },
   {
     slug: 'saona',
+    image: '/img/saona-480.webp',
+    alt: 'Catamarán con vela rosa en la piscina natural de Isla Saona',
     name: 'Isla Saona, día completo',
     from: 69,
     unit: 'por persona',
@@ -43,6 +49,8 @@ export const SERVICES = [
   },
   {
     slug: 'coco-bongo',
+    image: '/img/cocobongo-480.webp',
+    alt: 'Escenario con luces rosas y turquesa y acróbatas sobre el público',
     name: 'Coco Bongo + transporte',
     from: 90,
     unit: 'por persona, entrada regular',

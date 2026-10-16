@@ -11,6 +11,15 @@
         ],
         "createdAt": "2026-10-16T20:30:53.394Z",
         "reason": "Solo el h1 (46px, 2 lineas) va a 1.15; cuerpo 1.55 y botones 1.3"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "dist/index.html"
+        ],
+        "createdAt": "2026-10-16T20:42:22.009Z",
+        "reason": "La ilustracion del hero sangra a proposito hasta el borde inferior del bloque arena"
       }
     ]
   }
