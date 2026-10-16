@@ -1,0 +1,240 @@
+---
+import { BRAND, TAGLINE, SERVICES, FAQ, WHATSAPP_NUMBER, waLink } from '../config';
+const mainCta = waLink('Hola, quiero información sobre traslados y excursiones en Punta Cana.');
+const hasWa = Boolean(WHATSAPP_NUMBER);
+const year = new Date().getFullYear();
+---
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{BRAND} · Traslados y excursiones en Punta Cana por WhatsApp</title>
+  <meta name="description" content="Traslado aeropuerto-hotel, buggies, Isla Saona y Coco Bongo en Punta Cana. Precios claros, confirmación por escrito y atención en español por WhatsApp." />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preload" as="image" href="/logo.webp" />
+  <meta property="og:title" content={`${BRAND} · Punta Cana por WhatsApp`} />
+  <meta property="og:description" content={TAGLINE} />
+  <meta property="og:image" content="/logo.png" />
+  <style>
+    :root {
+      --indigo: #2e18a3;
+      --indigo-dark: #1f0f74;
+      --pink: #e3177c;
+      --ink: #1b1b2a;
+      --muted: #5c5c70;
+      --line: #e6e6ef;
+      --bg: #ffffff;
+      --bg-soft: #f6f6fb;
+      --wa: #1f8f4f;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); background: var(--bg);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 17px; line-height: 1.55;
+    }
+    a { color: var(--indigo); }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+    header { border-bottom: 1px solid var(--line); background: #fff; position: sticky; top: 0; z-index: 10; }
+    .nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0; }
+    .nav img { height: 34px; width: auto; display: block; }
+    .nav nav { display: none; gap: 22px; font-size: 15px; }
+    .nav nav a { color: var(--ink); text-decoration: none; }
+    .nav nav a:hover { color: var(--indigo); }
+    .btn {
+      display: inline-block; padding: 12px 20px; border-radius: 8px; font-weight: 600;
+      text-decoration: none; border: 2px solid transparent; font-size: 16px; line-height: 1.2;
+    }
+    .btn-wa { background: var(--wa); color: #fff; }
+    .btn-wa:hover { background: #17733f; }
+    .btn-ghost { border-color: var(--indigo); color: var(--indigo); background: #fff; }
+    .btn-ghost:hover { background: var(--bg-soft); }
+    .btn-sm { padding: 9px 14px; font-size: 15px; }
+    .hero { padding: 56px 0 40px; }
+    .hero h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.12; margin: 0 0 14px; letter-spacing: -0.01em; }
+    .hero h1 em { font-style: normal; color: var(--pink); }
+    .hero p.lead { font-size: 20px; color: var(--muted); margin: 0 0 24px; max-width: 640px; }
+    .hero .cta { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+    .hero .note { margin-top: 18px; font-size: 15px; color: var(--muted); }
+    .strip { background: var(--indigo); color: #fff; padding: 14px 0; font-size: 15px; }
+    .strip .wrap { display: flex; flex-wrap: wrap; gap: 8px 28px; }
+    .strip span::before { content: "✓ "; color: #ffd6ea; }
+    section { padding: 48px 0; }
+    section.soft { background: var(--bg-soft); }
+    h2 { font-size: clamp(24px, 3.5vw, 32px); margin: 0 0 8px; letter-spacing: -0.01em; }
+    .sub { color: var(--muted); margin: 0 0 28px; max-width: 640px; }
+    .grid { display: grid; gap: 16px; grid-template-columns: 1fr; }
+    .card { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 22px; display: flex; flex-direction: column; }
+    .card h3 { margin: 0 0 6px; font-size: 20px; }
+    .price { font-size: 28px; font-weight: 700; color: var(--indigo); margin: 2px 0 0; }
+    .price small { font-size: 14px; font-weight: 500; color: var(--muted); display: block; }
+    .card ul { margin: 14px 0 0; padding-left: 18px; color: var(--ink); }
+    .card ul.no { color: var(--muted); }
+    .card ul li { margin: 4px 0; }
+    .card .time { color: var(--muted); font-size: 15px; margin: 12px 0 16px; }
+    .card .btn { margin-top: auto; align-self: flex-start; }
+    .steps { display: grid; gap: 18px; grid-template-columns: 1fr; counter-reset: s; }
+    .step { padding-left: 54px; position: relative; }
+    .step::before {
+      counter-increment: s; content: counter(s); position: absolute; left: 0; top: 0;
+      width: 40px; height: 40px; border-radius: 50%; background: var(--pink); color: #fff;
+      font-weight: 700; display: grid; place-items: center; font-size: 18px;
+    }
+    .step h3 { margin: 6px 0 4px; font-size: 19px; }
+    .step p { margin: 0; color: var(--muted); }
+    .trust { display: grid; gap: 14px; grid-template-columns: 1fr; }
+    .trust div { border-left: 4px solid var(--pink); padding: 4px 0 4px 14px; }
+    .trust strong { display: block; }
+    .trust span { color: var(--muted); font-size: 15px; }
+    .who { display: grid; gap: 20px; grid-template-columns: 1fr; align-items: start; }
+    .who .ph { width: 120px; height: 120px; border-radius: 50%; background: var(--bg-soft); border: 1px solid var(--line); display: grid; place-items: center; color: var(--muted); font-size: 13px; text-align: center; }
+    details { border-top: 1px solid var(--line); padding: 14px 0; }
+    details:last-of-type { border-bottom: 1px solid var(--line); }
+    summary { cursor: pointer; font-weight: 600; font-size: 17px; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: "+"; color: var(--pink); font-weight: 700; }
+    details[open] summary::after { content: "–"; }
+    details p { margin: 10px 0 0; color: var(--muted); }
+    .contact { text-align: center; }
+    .contact .num { font-size: 22px; font-weight: 700; margin: 10px 0 18px; }
+    footer { border-top: 1px solid var(--line); padding: 26px 0 40px; color: var(--muted); font-size: 14px; }
+    footer .wrap { display: flex; flex-wrap: wrap; gap: 10px 28px; justify-content: space-between; }
+    @media (min-width: 720px) {
+      .nav nav { display: flex; }
+      .grid { grid-template-columns: 1fr 1fr; }
+      .steps { grid-template-columns: 1fr 1fr 1fr; }
+      .trust { grid-template-columns: 1fr 1fr; }
+      .who { grid-template-columns: 140px 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap nav">
+      <a href="/" aria-label={BRAND}><img src="/logo.webp" alt={BRAND} width="160" height="34" /></a>
+      <nav>
+        <a href="#servicios">Servicios</a>
+        <a href="#como-funciona">Cómo funciona</a>
+        <a href="#preguntas">Preguntas</a>
+        <a href="#quien">Quién atiende</a>
+      </nav>
+      <a class="btn btn-wa btn-sm" href={mainCta}>WhatsApp</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap hero">
+      <h1>Punta Cana sin sorpresas: <em>traslados y excursiones</em> con precio claro y atención en español.</h1>
+      <p class="lead">Escribes por WhatsApp con tu fecha, cuántos son y tu hotel. Te respondemos con precio y disponibilidad por escrito. Sin pagar por adelantado a desconocidos.</p>
+      <div class="cta">
+        <a class="btn btn-wa" href={mainCta}>Escribir por WhatsApp</a>
+        <a class="btn btn-ghost" href="#servicios">Ver precios</a>
+      </div>
+      <p class="note">Atendemos a viajeros de Colombia, Argentina, México, Chile, Perú y España. Los servicios los prestan operadores locales con licencia de turismo.</p>
+    </div>
+
+    <div class="strip">
+      <div class="wrap">
+        <span>Precio confirmado antes de reservar</span>
+        <span>Confirmación por escrito con nombre del chofer o guía</span>
+        <span>Cancelación gratis hasta 24 h antes</span>
+        <span>Respuesta en español, de persona a persona</span>
+      </div>
+    </div>
+
+    <section id="servicios">
+      <div class="wrap">
+        <h2>Lo que puedes reservar</h2>
+        <p class="sub">Precios de referencia por servicio. El precio exacto depende de tu fecha, tu hotel y cuántos viajan; te lo confirmamos por WhatsApp antes de que decidas.</p>
+        <div class="grid">
+          {SERVICES.map((s) => (
+            <article class="card" id={s.slug}>
+              <h3>{s.name}</h3>
+              <p class="price">desde ${s.from} USD <small>{s.unit}</small></p>
+              <ul>{s.includes.map((i) => <li>{i}</li>)}</ul>
+              <ul class="no">{s.excludes.map((i) => <li>No incluye: {i}</li>)}</ul>
+              <p class="time">{s.time}</p>
+              <a class="btn btn-wa btn-sm" href={waLink(s.message)}>Cotizar por WhatsApp</a>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="soft" id="como-funciona">
+      <div class="wrap">
+        <h2>Cómo funciona</h2>
+        <p class="sub">Tres pasos. Ningún formulario largo.</p>
+        <div class="steps">
+          <div class="step"><h3>Nos escribes</h3><p>Por WhatsApp: qué quieres, la fecha, cuántas personas y el hotel. Respondemos en el día.</p></div>
+          <div class="step"><h3>Te confirmamos por escrito</h3><p>Precio final, hora de recogida, qué incluye y el nombre del operador. Si te sirve, reservas.</p></div>
+          <div class="step"><h3>Te recogen en tu hotel</h3><p>El chofer o guía te espera en el lobby o en el aeropuerto con tu nombre. Pagas al operador el día del servicio.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="confianza">
+      <div class="wrap">
+        <h2>Por qué puedes confiar</h2>
+        <p class="sub">No te pedimos que confíes en una promesa. Te damos cosas que puedes verificar.</p>
+        <div class="trust">
+          <div><strong>Operadores con licencia</strong><span>Trabajamos como aliados de empresas registradas en República Dominicana. Si nos lo pides, te decimos cuál presta tu servicio.</span></div>
+          <div><strong>Nada por adelantado a nosotros</strong><span>Confirmamos la reserva y el operador te cobra el día del servicio o por enlace de pago oficial.</span></div>
+          <div><strong>Todo por escrito</strong><span>Precio, hora, punto de encuentro y política de cancelación en el mismo chat. Sin letra pequeña.</span></div>
+          <div><strong>Una persona, no un bot</strong><span>Te atiende Andrés, en español. Si algo sale mal el día del servicio, tienes a quién escribirle.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="soft" id="quien">
+      <div class="wrap">
+        <h2>Quién atiende</h2>
+        <div class="who">
+          <div class="ph">foto<br />próximamente</div>
+          <div>
+            <p><strong>Andrés</strong>, fundador de {BRAND}. Hispanohablante, como tú. Empecé esto después de ver a demasiados viajeros pagar de más o quedarse esperando en el aeropuerto por no tener a quién preguntarle en su idioma.</p>
+            <p>{BRAND} abre reservas para la temporada de diciembre de {year}. Las reseñas de los primeros viajeros aparecerán aquí, con nombre y fecha. No publicamos reseñas inventadas.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="preguntas">
+      <div class="wrap">
+        <h2>Preguntas que nos hacen</h2>
+        <p class="sub">Las mismas que se repiten en los grupos de viajeros. Respondidas con datos.</p>
+        {FAQ.map((f) => (
+          <details>
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <section class="soft contact" id="contacto">
+      <div class="wrap">
+        <h2>Escríbenos</h2>
+        {hasWa ? (
+          <>
+            <p class="num">WhatsApp +{WHATSAPP_NUMBER}</p>
+            <a class="btn btn-wa" href={mainCta}>Abrir WhatsApp</a>
+          </>
+        ) : (
+          <p class="num">WhatsApp: número en activación. Abrimos reservas en diciembre de {year}.</p>
+        )}
+        <p class="sub" style="margin: 16px auto 0;">Horario de atención: 8 a.m. a 10 p.m., hora de República Dominicana. Fuera de ese horario respondemos a primera hora.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span>© {year} {BRAND} · Punta Cana, República Dominicana</span>
+      <span>Aliado comercial de operadores turísticos con licencia. Precios en dólares estadounidenses.</span>
+    </div>
+  </footer>
+</body>
+</html>
