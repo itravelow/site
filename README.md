@@ -1,18 +1,18 @@
 # iTravelow · sitio web
 
-Sitio estático en Astro. Público, sin secretos. Se publica en GitHub Pages desde la rama
-`gh-pages` con `npm run deploy`. Cuando el token de GitHub tenga permiso `workflow`
-(`gh auth refresh -h github.com -s workflow`), se puede activar el despliegue automático
-copiando `deploy/github-actions-deploy.yml.example` a `.github/workflows/deploy.yml`.
+Sitio en Astro. Público, sin secretos. Hosting: **Cloudflare Pages** conectado a este
+repositorio: cada push a `main` publica en https://itravelow.com.
 
+- Build: `npm run build` · salida: `dist`
 - Contacto y precios: un solo archivo, `src/config.ts`.
 - Reglas de diseño y contenido: `docs/DESIGN_PRINCIPLES.md` del repositorio privado `itravelow/itravelow`.
-- Dominio: provisional en https://itravelow.github.io. Cuando exista itravelow.com: añadir
-  `public/CNAME` con el dominio, cambiar `site` en `astro.config.mjs` y apuntar el DNS.
+- Cabeceras de seguridad y caché: `public/_headers`.
 
 ```
 npm install
 npm run dev      # http://localhost:4321
 npm run build    # genera dist/
-npm run deploy   # compila y publica en https://itravelow.github.io
 ```
+
+Próximo paso técnico (semana 2): páginas privadas (mis reservas, QR) con el adaptador
+`@astrojs/cloudflare` y Supabase Auth.

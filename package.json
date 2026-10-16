@@ -6,13 +6,9 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview",
-    "deploy": "astro build && gh-pages -d dist -t -m \"Publicar sitio\""
+    "preview": "astro preview"
   },
   "dependencies": {
     "astro": "^7.4.0"
-  },
-  "devDependencies": {
-    "gh-pages": "^6.3.0"
   }
 }
