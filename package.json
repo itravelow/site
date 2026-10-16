@@ -7,7 +7,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "deploy": "astro build && gh-pages -d dist -t true -m \"Publicar sitio\""
+    "deploy": "astro build && gh-pages -d dist -t -m \"Publicar sitio\""
   },
   "dependencies": {
     "astro": "^7.4.0"
