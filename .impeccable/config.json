@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "tight-leading",
+        "value": "*",
+        "files": [
+          "dist/index.html"
+        ],
+        "createdAt": "2026-10-16T20:30:53.394Z",
+        "reason": "Solo el h1 (46px, 2 lineas) va a 1.15; cuerpo 1.55 y botones 1.3"
+      }
+    ]
+  }
+}

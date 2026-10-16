@@ -20,13 +20,13 @@ const year = new Date().getFullYear();
     :root {
       --indigo: #2e18a3;
       --indigo-dark: #1f0f74;
-      --pink: #e3177c;
+      --pink: #d61474;
       --ink: #1b1b2a;
       --muted: #5c5c70;
       --line: #e6e6ef;
       --bg: #ffffff;
       --bg-soft: #f6f6fb;
-      --wa: #1f8f4f;
+      --wa: #1b7f46;
     }
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
@@ -45,7 +45,7 @@ const year = new Date().getFullYear();
     .nav nav a:hover { color: var(--indigo); }
     .btn {
       display: inline-block; padding: 12px 20px; border-radius: 8px; font-weight: 600;
-      text-decoration: none; border: 2px solid transparent; font-size: 16px; line-height: 1.2;
+      text-decoration: none; border: 2px solid transparent; font-size: 16px; line-height: 1.3;
     }
     .btn-wa { background: var(--wa); color: #fff; }
     .btn-wa:hover { background: #17733f; }
@@ -53,8 +53,7 @@ const year = new Date().getFullYear();
     .btn-ghost:hover { background: var(--bg-soft); }
     .btn-sm { padding: 9px 14px; font-size: 15px; }
     .hero { padding: 56px 0 40px; }
-    .hero h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.12; margin: 0 0 14px; letter-spacing: -0.01em; }
-    .hero h1 em { font-style: normal; color: var(--pink); }
+    .hero h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.15; margin: 0 0 14px; letter-spacing: -0.01em; }
     .hero p.lead { font-size: 20px; color: var(--muted); margin: 0 0 24px; max-width: 640px; }
     .hero .cta { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
     .hero .note { margin-top: 18px; font-size: 15px; color: var(--muted); }
@@ -85,7 +84,7 @@ const year = new Date().getFullYear();
     .step h3 { margin: 6px 0 4px; font-size: 19px; }
     .step p { margin: 0; color: var(--muted); }
     .trust { display: grid; gap: 14px; grid-template-columns: 1fr; }
-    .trust div { border-left: 4px solid var(--pink); padding: 4px 0 4px 14px; }
+    .trust div { padding: 12px 0 0; border-top: 1px solid var(--line); }
     .trust strong { display: block; }
     .trust span { color: var(--muted); font-size: 15px; }
     .who { display: grid; gap: 20px; grid-template-columns: 1fr; align-items: start; }
@@ -126,7 +125,7 @@ const year = new Date().getFullYear();
 
   <main>
     <div class="wrap hero">
-      <h1>Punta Cana sin sorpresas: <em>traslados y excursiones</em> con precio claro y atención en español.</h1>
+      <h1>Punta Cana sin sorpresas: traslados y excursiones con precio claro y atención en español.</h1>
       <p class="lead">Escribes por WhatsApp con tu fecha, cuántos son y tu hotel. Te respondemos con precio y disponibilidad por escrito. Sin pagar por adelantado a desconocidos.</p>
       <div class="cta">
         <a class="btn btn-wa" href={mainCta}>Escribir por WhatsApp</a>
