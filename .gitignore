@@ -9,3 +9,6 @@ dist/
 .wrangler/
 wrangler.jsonc
 .dev.vars*
+
+# skills de diseño para agentes (se instalan en local, ver docs/DISENO_SKILLS.md del repo privado)
+.claude/
