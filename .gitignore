@@ -13,3 +13,6 @@ wrangler.jsonc
 # skills de diseño para agentes (se instalan en local, ver docs/DISENO_SKILLS.md del repo privado)
 .claude/
 .agents/
+
+# Fuentes pesadas locales (PNG originales, videos de kie.ai, material crudo de Andres)
+assets-src/media/

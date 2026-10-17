@@ -1,0 +1,308 @@
+---
+import { BRAND, TAGLINE, SERVICES, FAQ, WHATSAPP_NUMBER, waLink } from '../config';
+const mainCta = waLink('Hola, quiero información sobre traslados y excursiones en Punta Cana.');
+const hasWa = Boolean(WHATSAPP_NUMBER);
+const year = new Date().getFullYear();
+const ld = [
+  {
+    '@context': 'https://schema.org', '@type': 'LocalBusiness', name: BRAND, url: 'https://itravelow.com',
+    image: 'https://itravelow.com/og.jpg', description: TAGLINE,
+    areaServed: { '@type': 'Place', name: 'Punta Cana, República Dominicana' },
+    availableLanguage: ['es', 'en'], priceRange: '$35 - $90',
+    makesOffer: SERVICES.map((s) => ({ '@type': 'Offer', name: s.name, price: s.from, priceCurrency: 'USD' })),
+  },
+  {
+    '@context': 'https://schema.org', '@type': 'FAQPage',
+    mainEntity: FAQ.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  },
+];
+---
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{BRAND} · Traslados y excursiones en Punta Cana por WhatsApp</title>
+  <meta name="description" content="Traslado aeropuerto-hotel, buggies, Isla Saona y Coco Bongo en Punta Cana. Precios claros, confirmación por escrito y atención en español por WhatsApp." />
+  <link rel="canonical" href="https://itravelow.com/" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,600..800&display=swap" />
+  <link rel="preload" as="image" href="/img/hero-800.webp" imagesrcset="/img/hero-800.webp 800w, /img/hero-1200.webp 1200w" imagesizes="(min-width: 860px) 520px, 100vw" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content={`${BRAND} · Punta Cana por WhatsApp`} />
+  <meta property="og:description" content={TAGLINE} />
+  <meta property="og:image" content="https://itravelow.com/og.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:locale" content="es_ES" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="theme-color" content="#2e18a3" />
+  <script type="application/ld+json" set:html={JSON.stringify(ld)} />
+  <style>
+    :root {
+      --indigo: #2e18a3;
+      --indigo-ink: #1f0f74;
+      --pink: #d61474;
+      --sea: #0e9aa7;
+      --sand: #f8e7c9;
+      --ink: #171433;
+      --muted: #585470;
+      --line: #e6dcc6;
+      --bg: #ffffff;
+      --wa: #1b7f46;
+      --wa-dark: #15663a;
+      --display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+    body {
+      margin: 0; color: var(--ink); background: var(--bg);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 17px; line-height: 1.55;
+    }
+    a { color: var(--indigo); }
+    :focus-visible { outline: 3px solid var(--sea); outline-offset: 3px; }
+    img { max-width: 100%; height: auto; display: block; }
+    h1, h2, h3 { font-family: var(--display); font-variation-settings: "wdth" 90, "opsz" 48; letter-spacing: -0.015em; }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+
+    header { background: var(--sand); }
+    .nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; }
+    .nav img { height: 34px; width: auto; }
+    .nav nav { display: none; gap: 24px; font-size: 15.5px; }
+    .nav nav a { color: var(--ink); text-decoration: none; padding: 4px 0; border-bottom: 2px solid transparent; }
+    .nav nav a:hover { border-bottom-color: var(--pink); }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 10px; padding: 13px 22px; border-radius: 999px; font-weight: 700;
+      text-decoration: none; border: 2px solid transparent; font-size: 16px; line-height: 1.3; font-family: var(--display);
+    }
+    .btn svg { width: 20px; height: 20px; flex: none; }
+    .btn-wa { background: var(--wa); color: #fff; }
+    .btn-wa:hover { background: var(--wa-dark); }
+    .btn-ghost { border-color: var(--indigo); color: var(--indigo); background: transparent; }
+    .btn-ghost:hover { background: #fff; }
+    .btn-sm { padding: 9px 16px; font-size: 15px; }
+
+    .hero { background: var(--sand); overflow: hidden; }
+    .hero .wrap { display: grid; gap: 28px; grid-template-columns: 1fr; padding-top: 28px; padding-bottom: 0; }
+    .hero h1 { font-size: clamp(38px, 6vw, 64px); line-height: 1.02; margin: 0 0 18px; font-weight: 800; color: var(--indigo-ink); max-width: 14ch; }
+    .hero .lead { font-size: 19px; color: var(--ink); margin: 0 0 26px; max-width: 46ch; }
+    .hero .cta { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 20px; }
+    .hero .note { font-size: 15px; color: var(--muted); margin: 0 0 8px; max-width: 46ch; }
+    .hero .art { align-self: end; margin: 0 -20px; }
+    .hero .art img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; }
+
+    section { padding: 56px 0; }
+    section.sand { background: var(--sand); }
+    h2 { font-size: clamp(28px, 4vw, 40px); margin: 0 0 8px; font-weight: 800; color: var(--indigo-ink); line-height: 1.08; }
+    .sub { color: var(--muted); margin: 0 0 28px; max-width: 58ch; }
+
+    .board { border-top: 2px solid var(--indigo-ink); }
+    .row { display: grid; gap: 16px 20px; grid-template-columns: 1fr; padding: 22px 0; border-bottom: 1px solid var(--line); align-items: start; }
+    .row img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 6px; }
+    .row h3 { margin: 0 0 4px; font-size: 24px; font-weight: 700; }
+    .row .time { color: var(--muted); font-size: 15px; margin: 0 0 10px; }
+    .row ul { margin: 0; padding-left: 18px; }
+    .row ul li { margin: 3px 0; }
+    .row ul.no { color: var(--muted); font-size: 15.5px; margin-top: 6px; }
+    .row .buy { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+    .price { font-family: var(--display); font-weight: 800; font-size: 34px; line-height: 1; color: var(--indigo); margin: 0; }
+    .price small { display: block; font-weight: 600; font-size: 14px; color: var(--muted); margin-top: 6px; }
+    .price .desde { font-size: 15px; font-weight: 600; color: var(--pink); display: block; margin-bottom: 4px; }
+
+    .how { display: grid; gap: 32px; grid-template-columns: 1fr; align-items: start; }
+    .how ol { margin: 0; padding-left: 22px; }
+    .how ol li { margin: 0 0 14px; }
+    .how ol li strong { display: block; font-family: var(--display); font-size: 19px; font-weight: 700; }
+    .chat { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 14px; max-width: 420px; width: 100%; margin: 0 auto; }
+    .chat .top { display: flex; align-items: center; gap: 10px; padding: 4px 6px 12px; border-bottom: 1px solid var(--line); margin-bottom: 12px; font-size: 14px; color: var(--muted); }
+    .chat .top img { width: 28px; height: 28px; border-radius: 50%; }
+    .chat .top strong { color: var(--ink); display: block; font-size: 15px; }
+    .msg { max-width: 86%; padding: 9px 12px; border-radius: 14px; margin: 0 0 8px; font-size: 15px; line-height: 1.45; }
+    .msg.in { background: var(--sand); border-bottom-left-radius: 4px; margin-right: auto; }
+    .msg.out { background: #dcf5e6; border-bottom-right-radius: 4px; margin-left: auto; }
+    .msg time { display: block; text-align: right; font-size: 12px; color: var(--muted); margin-top: 3px; }
+    .chat .label { font-size: 13px; color: var(--muted); text-align: center; margin: 12px 0 0; }
+
+    .trust { display: grid; gap: 18px 32px; grid-template-columns: 1fr; }
+    .trust div { padding: 14px 0 0; border-top: 1px solid var(--line); }
+    .trust strong { display: block; font-family: var(--display); font-size: 19px; font-weight: 700; margin-bottom: 2px; }
+    .trust span { color: var(--muted); font-size: 15.5px; }
+
+    .who { display: grid; gap: 20px; grid-template-columns: 1fr; align-items: start; }
+    .who .ph { width: 120px; height: 120px; border-radius: 50%; background: #fff; border: 1px solid var(--line); display: grid; place-items: center; color: var(--muted); font-size: 13px; text-align: center; }
+    .who p { margin: 0 0 12px; }
+
+    details { border-top: 1px solid var(--line); padding: 14px 0; }
+    details:last-of-type { border-bottom: 1px solid var(--line); }
+    summary { cursor: pointer; font-weight: 700; font-size: 17px; list-style: none; display: flex; justify-content: space-between; gap: 12px; font-family: var(--display); }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: "+"; color: var(--pink); font-weight: 800; flex: none; }
+    details[open] summary::after { content: "–"; }
+    details p { margin: 10px 0 0; color: var(--muted); max-width: 70ch; }
+
+    .contact { background: var(--indigo-ink); color: #fff; }
+    .contact h2 { color: #fff; }
+    .contact .sub { color: #d9d3ff; }
+    .contact .num { font-family: var(--display); font-size: 26px; font-weight: 800; margin: 6px 0 18px; }
+    footer { padding: 0 0 40px; font-size: 14px; background: var(--indigo-ink); color: #c9c2f3; }
+    footer .wrap { display: flex; flex-wrap: wrap; gap: 10px 28px; justify-content: space-between; border-top: 1px solid #3d2fa0; padding-top: 22px; }
+
+    @media (min-width: 860px) {
+      .nav nav { display: flex; }
+      .hero .wrap { grid-template-columns: 1.05fr 1fr; gap: 24px; padding-top: 36px; align-items: end; }
+      .hero .copy { padding-bottom: 48px; }
+      .hero .art { margin: 0; max-width: 520px; justify-self: end; }
+      .row { grid-template-columns: 200px 1fr 200px; }
+      .row .buy { align-items: flex-end; text-align: right; }
+      .how { grid-template-columns: 1fr 1fr; gap: 48px; }
+      .trust { grid-template-columns: 1fr 1fr; }
+      .who { grid-template-columns: 140px 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap nav">
+      <a href="/" aria-label={BRAND}><img src="/logo.webp" alt={BRAND} width="160" height="34" /></a>
+      <nav aria-label="Secciones">
+        <a href="#servicios">Precios</a>
+        <a href="#como-funciona">Cómo funciona</a>
+        <a href="#confianza">Confianza</a>
+        <a href="#preguntas">Preguntas</a>
+      </nav>
+      <a class="btn btn-wa btn-sm" href={mainCta}>WhatsApp</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="hero">
+      <div class="wrap">
+        <div class="copy">
+          <h1>Te esperan en Punta Cana con tu nombre en un cartel.</h1>
+          <p class="lead">Traslados, buggies, Isla Saona y Coco Bongo con precio cerrado antes de reservar. Escribes por WhatsApp, te confirmamos por escrito y pagas el día del servicio.</p>
+          <div class="cta">
+            <a class="btn btn-wa" href={mainCta}><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.6.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 12 12 0 0 0 4.6 4c1.7.7 2.3.8 3.1.7a2.7 2.7 0 0 0 1.8-1.3c.2-.6.2-1.2.2-1.3l-.6-.3Z"/></svg>Escribir por WhatsApp</a>
+            <a class="btn btn-ghost" href="#servicios">Ver precios</a>
+          </div>
+          <p class="note">Atendemos en español a viajeros de Colombia, Argentina, México, Chile, Perú y España. Los servicios los prestan operadores locales con licencia de turismo.</p>
+        </div>
+        <div class="art">
+          <img src="/img/hero-800.webp" srcset="/img/hero-800.webp 800w, /img/hero-1200.webp 1200w" sizes="(min-width: 860px) 520px, 100vw" width="1200" height="1212" alt="Ilustración: un chofer con camisa blanca sostiene un cartel que dice TU NOMBRE en la salida del aeropuerto de Punta Cana, con palmeras y una van blanca detrás" fetchpriority="high" />
+        </div>
+      </div>
+    </div>
+
+    <section id="servicios">
+      <div class="wrap">
+        <h2>Precios de hoy</h2>
+        <p class="sub">Precios de referencia en dólares. El precio exacto depende de tu fecha, tu hotel y cuántos viajan: te lo confirmamos por WhatsApp antes de que decidas nada.</p>
+        <div class="board">
+          {SERVICES.map((s) => (
+            <article class="row" id={s.slug}>
+              <img src={s.image} width="480" height="360" alt={s.alt} loading="lazy" decoding="async" />
+              <div>
+                <h3>{s.name}</h3>
+                <p class="time">{s.time}</p>
+                <ul>{s.includes.map((i) => <li>{i}</li>)}</ul>
+                <ul class="no">{s.excludes.map((i) => <li>No incluye: {i}</li>)}</ul>
+              </div>
+              <div class="buy">
+                <p class="price"><span class="desde">desde</span>${s.from} USD<small>{s.unit}</small></p>
+                <a class="btn btn-wa btn-sm" href={waLink(s.message)}>Cotizar por WhatsApp</a>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="sand" id="como-funciona">
+      <div class="wrap how">
+        <div>
+          <h2>Así va la conversación</h2>
+          <p class="sub">No hay formulario. Es un chat, y termina con todo por escrito.</p>
+          <ol>
+            <li><strong>Nos cuentas qué quieres</strong>Fecha, cuántas personas y el hotel. Respondemos el mismo día, en horario de 8 a.m. a 10 p.m.</li>
+            <li><strong>Te confirmamos por escrito</strong>Precio final, hora de recogida, qué incluye y el nombre del operador que te atiende. Si te sirve, dices que sí.</li>
+            <li><strong>Te recogen y pagas allí</strong>El chofer o guía te espera en el lobby o en el aeropuerto con tu nombre. Pagas al operador el día del servicio.</li>
+          </ol>
+        </div>
+        <div class="chat" aria-label="Ejemplo de conversación por WhatsApp">
+          <div class="top"><img src="/favicon.svg" alt="" width="28" height="28" /><div><strong>{BRAND}</strong>en línea</div></div>
+          <p class="msg in">Hola, somos 4. Llegamos el 3 de diciembre a las 3:40 pm al hotel Bahía Príncipe Bávaro. ¿Cuánto vale el traslado?<time>14:02</time></p>
+          <p class="msg out">Hola, Laura. Traslado privado para 4 hasta Bahía Príncipe: 38 USD por el vehículo. Miguel te espera en la salida con un cartel con tu nombre y sigue tu vuelo por si se retrasa. Pagas al llegar. ¿Te lo confirmo?<time>14:06</time></p>
+          <p class="msg in">Sí, por favor.<time>14:07</time></p>
+          <p class="msg out">Confirmado. 3 dic · vuelo AV254 · 3:40 pm · Bahía Príncipe Bávaro · 38 USD · chofer Miguel (te paso su número el día antes). Cancelación gratis hasta 24 h antes. Buen viaje.<time>14:08</time></p>
+          <p class="label">Ejemplo con nombres ficticios. Así se ve una reserva real.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="confianza">
+      <div class="wrap">
+        <h2>Por qué puedes confiar</h2>
+        <p class="sub">No te pedimos que confíes en una promesa. Te damos cosas que puedes comprobar.</p>
+        <div class="trust">
+          <div><strong>Operadores con licencia</strong><span>Trabajamos como aliados de empresas registradas en República Dominicana. Si nos lo pides, te decimos cuál presta tu servicio.</span></div>
+          <div><strong>Nada por adelantado a nosotros</strong><span>Confirmamos la reserva y el operador te cobra el día del servicio o por enlace de pago oficial.</span></div>
+          <div><strong>Todo por escrito</strong><span>Precio, hora, punto de encuentro y política de cancelación en el mismo chat. Sin letra pequeña.</span></div>
+          <div><strong>Una persona, no un bot</strong><span>Te atiende Andrés, en español. Si algo sale mal el día del servicio, tienes a quién escribirle.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sand" id="quien">
+      <div class="wrap">
+        <h2>Quién atiende</h2>
+        <div class="who">
+          <div class="ph">foto<br />próximamente</div>
+          <div>
+            <p><strong>Andrés</strong>, fundador de {BRAND}. Hispanohablante, como tú. Empecé esto después de ver a demasiados viajeros pagar de más o quedarse esperando en el aeropuerto por no tener a quién preguntarle en su idioma.</p>
+            <p>{BRAND} abre reservas para la temporada de diciembre de {year}. Las reseñas de los primeros viajeros aparecerán aquí, con nombre y fecha. No publicamos reseñas inventadas.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="preguntas">
+      <div class="wrap">
+        <h2>Preguntas que nos hacen</h2>
+        <p class="sub">Las mismas que se repiten en los grupos de viajeros. Respondidas con datos.</p>
+        {FAQ.map((f) => (
+          <details>
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <section class="contact" id="contacto">
+      <div class="wrap">
+        <h2>Escríbenos</h2>
+        {hasWa ? (
+          <>
+            <p class="num">WhatsApp +{WHATSAPP_NUMBER}</p>
+            <a class="btn btn-wa" href={mainCta}>Abrir WhatsApp</a>
+          </>
+        ) : (
+          <p class="num">WhatsApp: número en activación. Abrimos reservas en diciembre de {year}.</p>
+        )}
+        <p class="sub">Horario de atención: 8 a.m. a 10 p.m., hora de República Dominicana. Fuera de ese horario respondemos a primera hora. Correo: hola@itravelow.com</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span>© {year} {BRAND} · Punta Cana, República Dominicana</span>
+      <span>Aliado comercial de operadores turísticos con licencia. Precios en dólares estadounidenses. Ilustraciones propias.</span>
+    </div>
+  </footer>
+</body>
+</html>

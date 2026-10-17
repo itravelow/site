@@ -1,70 +1,136 @@
-// Único lugar donde se cambian datos de contacto y precios de referencia.
-// Los precios son de referencia pública (oct 2026) hasta que haya tarifa de aliado confirmada.
+// Único lugar donde se cambian datos de contacto, precios y pasarela de pago.
+// Aquí van SOLO precios de venta al público. Los costos que pagamos a cada operador son
+// privados y viven en el repositorio privado (docs/MODELO_NEGOCIO.md), nunca aquí.
 
-export const WHATSAPP_NUMBER = ''; // Formato internacional sin "+", ej. "18095551234". Vacío = botón en modo "próximamente".
 export const BRAND = 'iTravelow';
-export const TAGLINE = 'Traslados y excursiones en Punta Cana, atendidos por WhatsApp en español.';
+export const TAGLINE = 'Traslados y excursiones en Punta Cana. Reservas y pagas aquí, te confirmamos por escrito.';
+export const EMAIL = 'hola@itravelow.com';
+
+// WhatsApp de asistencia (chat 24/7). Formato internacional sin "+", ej. "18095551234".
+// Vacío = el botón de asistencia muestra el correo mientras se activa el número.
+export const WHATSAPP_NUMBER = '';
 
 export function waLink(message: string): string {
-  if (!WHATSAPP_NUMBER) return '#contacto';
+  if (!WHATSAPP_NUMBER) return '';
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 }
 
-export const SERVICES = [
+// Pasarela de pago. 'pending' = aún no hay cuenta: la reserva se registra y el enlace de
+// pago se envía a mano. Cuando exista cuenta se cambia a 'stripe' o 'paypal' y se despliega
+// la función /api/checkout (ver docs/MODELO_NEGOCIO.md en el repo privado).
+export const PAYMENTS: { provider: 'pending' | 'stripe' | 'paypal'; currency: 'USD' } = {
+  provider: 'pending',
+  currency: 'USD',
+};
+
+export type Unit = 'persona' | 'vehículo';
+
+export interface ServiceOption {
+  id: string;
+  label: string;
+  price: number; // USD por unidad
+  unit: Unit;
+  capacity?: number; // solo para unit = 'vehículo': personas por vehículo
+}
+
+export interface Service {
+  slug: string;
+  name: string;
+  short: string; // una línea para el hero y los resúmenes
+  image: string;
+  alt: string;
+  from: number; // precio más bajo entre las opciones, para "desde"
+  fromUnit: string;
+  time: string;
+  includes: string[];
+  excludes: string[];
+  options: ServiceOption[];
+  roundTrip?: boolean; // si aplica la opción "ida y vuelta" (x2)
+  minPax: number;
+  maxPax: number;
+}
+
+// Precios de referencia pública (oct 2026). Se ajustan cuando cada operador confirme tarifa.
+export const SERVICES: Service[] = [
   {
     slug: 'traslados',
+    name: 'Traslado aeropuerto ↔ hotel',
+    short: 'Chofer con tu nombre en un cartel a la salida del aeropuerto.',
     image: '/img/traslado-480.webp',
     alt: 'Van blanca por la carretera de palmeras hacia un hotel de Bávaro',
-    name: 'Traslado aeropuerto ↔ hotel',
     from: 35,
-    unit: 'por vehículo, hasta 4 personas',
+    fromUnit: 'por vehículo, un trayecto',
+    time: '20 a 45 minutos según la zona del hotel',
     includes: ['Chofer esperándote con cartel con tu nombre', 'Vehículo privado con aire acondicionado', 'Seguimiento de tu vuelo si se retrasa'],
     excludes: ['Propina (opcional)'],
-    time: '20 a 45 minutos según la zona del hotel',
-    message: 'Hola, quiero cotizar un traslado del aeropuerto al hotel. Fecha: ___ · Personas: ___ · Hotel: ___',
+    options: [
+      { id: 'auto', label: 'Vehículo privado, hasta 4 personas', price: 35, unit: 'vehículo', capacity: 4 },
+      { id: 'van', label: 'Van privada, hasta 8 personas', price: 60, unit: 'vehículo', capacity: 8 },
+    ],
+    roundTrip: true,
+    minPax: 1,
+    maxPax: 16,
   },
   {
     slug: 'buggies',
+    name: 'Buggies en Macao',
+    short: 'Caminos de tierra, playa Macao y cenote, con recogida en el hotel.',
     image: '/img/buggies-480.webp',
     alt: 'Buggy levantando polvo rojo en un camino de tierra de Macao',
-    name: 'Buggies en Macao',
-    from: 50,
-    unit: 'por persona',
+    from: 45,
+    fromUnit: 'por persona',
+    time: '3 a 4 horas · salidas en la mañana y en la tarde',
     includes: ['Recogida en tu hotel', 'Ruta por caminos de tierra, playa Macao y cenote', 'Buggy doble (2 personas) o familiar (4)'],
     excludes: ['Protector para la cara (lleva un pañuelo)', 'Ropa que no te importe ensuciar'],
-    time: '3 a 4 horas · salidas en la mañana y en la tarde',
-    message: 'Hola, quiero reservar buggies en Macao. Fecha: ___ · Personas: ___ · Hotel: ___',
+    options: [
+      { id: 'doble', label: 'Buggy doble (2 personas)', price: 50, unit: 'persona' },
+      { id: 'familiar', label: 'Buggy familiar (4 personas)', price: 45, unit: 'persona' },
+    ],
+    minPax: 1,
+    maxPax: 12,
   },
   {
     slug: 'saona',
+    name: 'Isla Saona, día completo',
+    short: 'Catamarán, piscina natural y almuerzo en la isla.',
     image: '/img/saona-480.webp',
     alt: 'Catamarán con vela rosa en la piscina natural de Isla Saona',
-    name: 'Isla Saona, día completo',
     from: 69,
-    unit: 'por persona',
+    fromUnit: 'por persona',
+    time: 'Unas 11 horas en total · regreso al atardecer',
     includes: ['Recogida en el hotel entre 7 y 8 a.m.', 'Catamarán o lancha, parada en la piscina natural', 'Almuerzo buffet y bebidas a bordo'],
     excludes: ['Fotos y recuerdos en la isla', 'Propinas'],
-    time: 'Unas 11 horas en total · regreso al atardecer',
-    message: 'Hola, quiero reservar la excursión a Isla Saona. Fecha: ___ · Personas: ___ · Hotel: ___',
+    options: [
+      { id: 'adulto', label: 'Adulto', price: 69, unit: 'persona' },
+      { id: 'nino', label: 'Niño de 3 a 11 años', price: 45, unit: 'persona' },
+    ],
+    minPax: 1,
+    maxPax: 20,
   },
   {
     slug: 'coco-bongo',
+    name: 'Coco Bongo + transporte',
+    short: 'Entrada al show y transporte ida y vuelta desde tu hotel.',
     image: '/img/cocobongo-480.webp',
     alt: 'Escenario con luces rosas y turquesa y acróbatas sobre el público',
-    name: 'Coco Bongo + transporte',
     from: 90,
-    unit: 'por persona, entrada regular',
-    includes: ['Entrada al show (regular, Premium o Gold según elijas)', 'Transporte ida y vuelta desde tu hotel', 'Regreso hacia la 1:30 a.m.'],
+    fromUnit: 'por persona, entrada regular',
+    time: 'Salida desde el hotel alrededor de las 9 p.m. · regreso hacia la 1:30 a.m.',
+    includes: ['Entrada al show', 'Transporte ida y vuelta desde tu hotel', 'Barra abierta nacional según el tipo de entrada'],
     excludes: ['Mesas VIP (se cotizan aparte)', 'Solo mayores de 18 años'],
-    time: 'Salida desde el hotel alrededor de las 9 p.m.',
-    message: 'Hola, quiero entradas para Coco Bongo con transporte. Fecha: ___ · Personas: ___ · Hotel: ___',
+    options: [
+      { id: 'regular', label: 'Entrada regular', price: 90, unit: 'persona' },
+      { id: 'gold', label: 'Entrada Gold Member', price: 140, unit: 'persona' },
+    ],
+    minPax: 1,
+    maxPax: 20,
   },
 ];
 
 export const FAQ = [
   {
     q: '¿Cuánto cuesta el taxi del aeropuerto de Punta Cana a Bávaro?',
-    a: 'El taxi oficial del aeropuerto tiene tarifa fija por hotel: la mayoría de Bávaro está entre 20 y 40 USD por vehículo. Un traslado privado reservado con nosotros cuesta desde 35 USD, con chofer esperándote con tu nombre y confirmación por escrito antes de viajar.',
+    a: 'El taxi oficial del aeropuerto tiene tarifa fija por hotel: la mayoría de Bávaro está entre 20 y 40 USD por vehículo. Un traslado privado reservado aquí cuesta desde 35 USD, con chofer esperándote con tu nombre y confirmación por escrito antes de viajar.',
   },
   {
     q: '¿Funciona Uber en Punta Cana?',
@@ -72,14 +138,14 @@ export const FAQ = [
   },
   {
     q: '¿Cómo se paga?',
-    a: 'Tú no nos pagas por adelantado a nosotros. Confirmamos tu reserva por escrito y el operador local te cobra el día del servicio, o por enlace de pago si lo prefieres. Siempre sabes el precio antes de decir que sí.',
+    a: 'Reservas en esta página y pagas con tarjeta en un enlace de pago seguro. Nosotros coordinamos y pagamos al operador que presta el servicio. El día del servicio no tienes que pagar nada más, salvo propinas si quieres darlas.',
   },
   {
     q: '¿Puedo cancelar?',
-    a: 'Sí. Cancelación gratuita hasta 24 horas antes en todos los servicios. Si el operador cancela por clima, se devuelve el 100 %.',
+    a: 'Sí. Cancelación gratuita hasta 24 horas antes en todos los servicios, con reembolso completo. Si el operador cancela por clima, se devuelve el 100 %.',
   },
   {
     q: '¿Quién presta el servicio?',
-    a: 'Operadores locales con licencia de turismo en República Dominicana, con los que trabajamos como aliados. Nosotros te atendemos en español antes, durante y después; ellos ponen los vehículos, los barcos y los guías.',
+    a: 'Operadores locales con licencia de turismo en República Dominicana. Nosotros vendemos, coordinamos y te atendemos en español antes, durante y después; ellos ponen los vehículos, los barcos y los guías.',
   },
 ];
