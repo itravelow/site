@@ -15,7 +15,10 @@ Los originales (4K, 50 a 190 MB) están en `assets-src/media/raw/` (ignorado por
 `iTravelow/media/`. Regla: material propio o con permiso escrito. Nada tomado de otros sitios
 ni con marcas de agua quitadas. Si falta algo, Pexels o Unsplash con licencia libre.
 
-Las fotos de producto en `public/img/` siguen siendo relleno generado (temporal).
+Las fotos de producto en `public/img/` siguen siendo relleno generado (temporal); se
+reemplazan desde el panel `/admin` (se guardan en Supabase Storage). La foto de "Quién atiende"
+(`public/img/andres-*.webp`, original `andres.png`) es generada en kie.ai (`nano-banana-pro`)
+a pedido de Andrés, que no quiere mostrar su cara por ahora.
 
 ## Cómo cambiar o añadir material (Andrés)
 

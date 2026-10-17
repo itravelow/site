@@ -1,0 +1,379 @@
+{
+  "services": [
+    {
+      "slug": "traslados",
+      "sort": 0,
+      "image480": "/img/traslado-480.webp",
+      "image960": "/img/traslado-960.webp",
+      "roundTrip": true,
+      "minPax": 1,
+      "maxPax": 16,
+      "name": {
+        "en": "Airport ↔ hotel transfer",
+        "es": "Traslado aeropuerto ↔ hotel"
+      },
+      "short": {
+        "en": "A driver holding a sign with your name at the airport exit.",
+        "es": "Chofer con tu nombre en un cartel a la salida del aeropuerto."
+      },
+      "alt": {
+        "en": "White van on the palm-lined road to a Bávaro hotel",
+        "es": "Van blanca por la carretera de palmeras hacia un hotel de Bávaro"
+      },
+      "fromUnit": {
+        "en": "per vehicle, one way",
+        "es": "por vehículo, un trayecto"
+      },
+      "duration": {
+        "en": "20 to 45 minutes depending on the hotel area",
+        "es": "20 a 45 minutos según la zona del hotel"
+      },
+      "includes": {
+        "en": [
+          "Driver waiting with a sign with your name",
+          "Private air-conditioned vehicle",
+          "Flight tracking if you are delayed"
+        ],
+        "es": [
+          "Chofer esperándote con cartel con tu nombre",
+          "Vehículo privado con aire acondicionado",
+          "Seguimiento de tu vuelo si se retrasa"
+        ]
+      },
+      "excludes": {
+        "en": [
+          "Tip (optional)"
+        ],
+        "es": [
+          "Propina (opcional)"
+        ]
+      },
+      "options": [
+        {
+          "id": "auto",
+          "label": {
+            "en": "Private car, up to 4 people",
+            "es": "Vehículo privado, hasta 4 personas"
+          },
+          "price": 35,
+          "unit": "vehículo",
+          "capacity": 4
+        },
+        {
+          "id": "van",
+          "label": {
+            "en": "Private van, up to 8 people",
+            "es": "Van privada, hasta 8 personas"
+          },
+          "price": 60,
+          "unit": "vehículo",
+          "capacity": 8
+        }
+      ]
+    },
+    {
+      "slug": "buggies",
+      "sort": 10,
+      "image480": "/img/buggies-480.webp",
+      "image960": "/img/buggies-960.webp",
+      "roundTrip": false,
+      "minPax": 1,
+      "maxPax": 12,
+      "name": {
+        "en": "Buggies in Macao",
+        "es": "Buggies en Macao"
+      },
+      "short": {
+        "en": "Dirt roads, Macao beach and a cenote, with hotel pickup.",
+        "es": "Caminos de tierra, playa Macao y cenote, con recogida en el hotel."
+      },
+      "alt": {
+        "en": "Buggy kicking up red dust on a dirt road in Macao",
+        "es": "Buggy levantando polvo rojo en un camino de tierra de Macao"
+      },
+      "fromUnit": {
+        "en": "per person",
+        "es": "por persona"
+      },
+      "duration": {
+        "en": "3 to 4 hours · morning and afternoon departures",
+        "es": "3 a 4 horas · salidas en la mañana y en la tarde"
+      },
+      "includes": {
+        "en": [
+          "Pickup at your hotel",
+          "Route on dirt roads, Macao beach and a cenote",
+          "Double buggy (2 people) or family buggy (4)"
+        ],
+        "es": [
+          "Recogida en tu hotel",
+          "Ruta por caminos de tierra, playa Macao y cenote",
+          "Buggy doble (2 personas) o familiar (4)"
+        ]
+      },
+      "excludes": {
+        "en": [
+          "Face cover (bring a bandana)",
+          "Clothes you don’t mind getting dirty"
+        ],
+        "es": [
+          "Protector para la cara (lleva un pañuelo)",
+          "Ropa que no te importe ensuciar"
+        ]
+      },
+      "options": [
+        {
+          "id": "doble",
+          "label": {
+            "en": "Double buggy (2 people)",
+            "es": "Buggy doble (2 personas)"
+          },
+          "price": 50,
+          "unit": "persona"
+        },
+        {
+          "id": "familiar",
+          "label": {
+            "en": "Family buggy (4 people)",
+            "es": "Buggy familiar (4 personas)"
+          },
+          "price": 45,
+          "unit": "persona"
+        }
+      ]
+    },
+    {
+      "slug": "saona",
+      "sort": 20,
+      "image480": "/img/saona-480.webp",
+      "image960": "/img/saona-960.webp",
+      "roundTrip": false,
+      "minPax": 1,
+      "maxPax": 20,
+      "name": {
+        "en": "Saona Island, full day",
+        "es": "Isla Saona, día completo"
+      },
+      "short": {
+        "en": "Catamaran, natural pool and lunch on the island.",
+        "es": "Catamarán, piscina natural y almuerzo en la isla."
+      },
+      "alt": {
+        "en": "Catamaran with a pink sail in the natural pool of Saona Island",
+        "es": "Catamarán con vela rosa en la piscina natural de Isla Saona"
+      },
+      "fromUnit": {
+        "en": "per person",
+        "es": "por persona"
+      },
+      "duration": {
+        "en": "About 11 hours in total · back at sunset",
+        "es": "Unas 11 horas en total · regreso al atardecer"
+      },
+      "includes": {
+        "en": [
+          "Hotel pickup between 7 and 8 a.m.",
+          "Catamaran or speedboat, stop at the natural pool",
+          "Buffet lunch and drinks on board"
+        ],
+        "es": [
+          "Recogida en el hotel entre 7 y 8 a.m.",
+          "Catamarán o lancha, parada en la piscina natural",
+          "Almuerzo buffet y bebidas a bordo"
+        ]
+      },
+      "excludes": {
+        "en": [
+          "Photos and souvenirs on the island",
+          "Tips"
+        ],
+        "es": [
+          "Fotos y recuerdos en la isla",
+          "Propinas"
+        ]
+      },
+      "options": [
+        {
+          "id": "adulto",
+          "label": {
+            "en": "Adult",
+            "es": "Adulto"
+          },
+          "price": 69,
+          "unit": "persona"
+        },
+        {
+          "id": "nino",
+          "label": {
+            "en": "Child 3 to 11 years",
+            "es": "Niño de 3 a 11 años"
+          },
+          "price": 45,
+          "unit": "persona"
+        }
+      ]
+    },
+    {
+      "slug": "coco-bongo",
+      "sort": 30,
+      "image480": "/img/cocobongo-480.webp",
+      "image960": "/img/cocobongo-960.webp",
+      "roundTrip": false,
+      "minPax": 1,
+      "maxPax": 20,
+      "name": {
+        "en": "Coco Bongo + transport",
+        "es": "Coco Bongo + transporte"
+      },
+      "short": {
+        "en": "Show ticket and round-trip transport from your hotel.",
+        "es": "Entrada al show y transporte ida y vuelta desde tu hotel."
+      },
+      "alt": {
+        "en": "Stage with pink and turquoise lights and acrobats above the crowd",
+        "es": "Escenario con luces rosas y turquesa y acróbatas sobre el público"
+      },
+      "fromUnit": {
+        "en": "per person, regular ticket",
+        "es": "por persona, entrada regular"
+      },
+      "duration": {
+        "en": "Hotel departure around 9 p.m. · back around 1:30 a.m.",
+        "es": "Salida desde el hotel alrededor de las 9 p.m. · regreso hacia la 1:30 a.m."
+      },
+      "includes": {
+        "en": [
+          "Show ticket",
+          "Round-trip transport from your hotel",
+          "Domestic open bar depending on ticket type"
+        ],
+        "es": [
+          "Entrada al show",
+          "Transporte ida y vuelta desde tu hotel",
+          "Barra abierta nacional según el tipo de entrada"
+        ]
+      },
+      "excludes": {
+        "en": [
+          "VIP tables (quoted separately)",
+          "18 and over only"
+        ],
+        "es": [
+          "Mesas VIP (se cotizan aparte)",
+          "Solo mayores de 18 años"
+        ]
+      },
+      "options": [
+        {
+          "id": "regular",
+          "label": {
+            "en": "Regular ticket",
+            "es": "Entrada regular"
+          },
+          "price": 90,
+          "unit": "persona"
+        },
+        {
+          "id": "gold",
+          "label": {
+            "en": "Gold Member ticket",
+            "es": "Entrada Gold Member"
+          },
+          "price": 140,
+          "unit": "persona"
+        }
+      ]
+    }
+  ],
+  "combos": [
+    {
+      "slug": "llegada-saona",
+      "sort": 0,
+      "name": {
+        "en": "Easy arrival + Saona Island",
+        "es": "Llegada tranquila + Isla Saona"
+      },
+      "blurb": {
+        "en": "Picked up at the airport, taken back at the end, and a full day in Saona.",
+        "es": "Te recogen en el aeropuerto, te llevan de vuelta al final y un día completo en Saona."
+      },
+      "items": [
+        {
+          "option": "auto",
+          "service": "traslados",
+          "roundTrip": true
+        },
+        {
+          "option": "adulto",
+          "service": "saona"
+        }
+      ]
+    },
+    {
+      "slug": "aventura",
+      "sort": 10,
+      "name": {
+        "en": "Adventure: buggies + Saona + transfers",
+        "es": "Aventura: buggies + Saona + traslados"
+      },
+      "blurb": {
+        "en": "Round-trip transfer, a morning of buggies in Macao and the catamaran day to Saona.",
+        "es": "Traslado ida y vuelta, una mañana de buggies en Macao y el día de catamarán a Saona."
+      },
+      "items": [
+        {
+          "option": "auto",
+          "service": "traslados",
+          "roundTrip": true
+        },
+        {
+          "option": "doble",
+          "service": "buggies"
+        },
+        {
+          "option": "adulto",
+          "service": "saona"
+        }
+      ]
+    },
+    {
+      "slug": "todo",
+      "sort": 20,
+      "name": {
+        "en": "All of Punta Cana",
+        "es": "Todo Punta Cana"
+      },
+      "blurb": {
+        "en": "All four: round-trip transfers, buggies, Saona and the night at Coco Bongo.",
+        "es": "Los cuatro: traslados ida y vuelta, buggies, Saona y la noche de Coco Bongo."
+      },
+      "items": [
+        {
+          "option": "auto",
+          "service": "traslados",
+          "roundTrip": true
+        },
+        {
+          "option": "doble",
+          "service": "buggies"
+        },
+        {
+          "option": "adulto",
+          "service": "saona"
+        },
+        {
+          "option": "regular",
+          "service": "coco-bongo"
+        }
+      ]
+    }
+  ],
+  "discounts": {
+    "2": 0.05,
+    "3": 0.08,
+    "4": 0.1
+  },
+  "whatsapp": "",
+  "source": "supabase",
+  "fetchedAt": "2026-10-17T08:12:17.230Z"
+}

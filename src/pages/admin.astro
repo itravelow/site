@@ -1,0 +1,151 @@
+---
+// Panel de administración (solo Andrés): tours, precios, combos, descuentos, WhatsApp y "Publicar".
+// Es una página estática que habla con Supabase desde el navegador; la seguridad está en las
+// políticas RLS (solo los correos de itw_admins pueden escribir). Lleva noindex y no se enlaza.
+import { BRAND, SITE_URL } from '../config';
+const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL || '';
+const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
+---
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Panel · {BRAND}</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,500..800&display=swap" />
+  <meta name="theme-color" content="#2e18a3" />
+  <style is:global>
+    :root {
+      --indigo: #2e18a3; --indigo-deep: #1c0e6b; --indigo-soft: #ecebfa; --magenta: #e8087f; --magenta-ink: #c2066a; --magenta-hover: #d4076f;
+      --ink: #14103a; --muted: #5b5878; --line: #e3e1ee; --surface: #f6f5fc; --bg: #fff; --ok: #1b7f46; --warn: #a35a00;
+      --display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif; --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body { margin: 0; color: var(--ink); background: var(--surface); font: 16px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    a { color: var(--indigo); }
+    :focus-visible { outline: 3px solid var(--magenta); outline-offset: 2px; }
+    h1, h2, h3 { font-family: var(--display); letter-spacing: -0.01em; color: var(--indigo-deep); margin: 0; }
+    h1 { font-size: 22px; } h2 { font-size: 26px; margin-bottom: 4px; } h3 { font-size: 18px; margin: 18px 0 8px; }
+    header { background: #fff; border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5; }
+    .bar { max-width: 1040px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 14px; }
+    .bar img { height: 34px; width: auto; }
+    .bar .who { margin-left: auto; font-size: 14px; color: var(--muted); display: flex; gap: 12px; align-items: center; }
+    main { max-width: 1040px; margin: 0 auto; padding: 20px 16px 80px; }
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 20px; padding: 0; list-style: none; }
+    .tabs button { border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 999px; padding: 8px 16px; font: 700 15px var(--display); cursor: pointer; }
+    .tabs button[aria-selected="true"] { background: var(--indigo); border-color: var(--indigo); color: #fff; }
+    .card { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+    .sub { color: var(--muted); margin: 0 0 16px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 18px; border-radius: 999px; font: 700 15px var(--display); border: 2px solid transparent; cursor: pointer; text-decoration: none; transition: transform 160ms var(--ease-out), background-color 160ms ease; }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.55; cursor: default; }
+    .btn-primary { background: var(--magenta-ink); color: #fff; } .btn-primary:hover { background: var(--magenta-hover); }
+    .btn-ghost { border-color: var(--indigo); color: var(--indigo); background: #fff; } .btn-ghost:hover { background: var(--indigo-soft); }
+    .btn-danger { border-color: #b3261e; color: #b3261e; background: #fff; }
+    .btn-sm { padding: 6px 12px; font-size: 14px; }
+    .link { border: 0; background: none; color: var(--indigo); font: 700 14px var(--display); cursor: pointer; padding: 0; }
+    .field { display: block; margin: 0 0 14px; }
+    .field > span { display: block; font-weight: 700; font-size: 14px; margin-bottom: 5px; }
+    .field > span small { font-weight: 500; color: var(--muted); }
+    .field input[type="text"], .field input[type="number"], .field input[type="email"], .field input[type="password"], .field input[type="tel"], .field textarea, .field select {
+      width: 100%; border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 12px; font: inherit; color: var(--ink); background: #fff;
+    }
+    .field textarea { min-height: 84px; resize: vertical; }
+    .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--indigo); outline: none; box-shadow: 0 0 0 3px var(--indigo-soft); }
+    .check { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; cursor: pointer; font-weight: 600; }
+    .check input { width: 18px; height: 18px; accent-color: var(--indigo); margin: 0; }
+    .grid2 { display: grid; gap: 0 18px; grid-template-columns: 1fr; }
+    .lang2 { display: grid; gap: 0 18px; grid-template-columns: 1fr; }
+    .lang2 .field:nth-child(2) > span::after { content: " (inglés, opcional)"; font-weight: 500; color: var(--muted); }
+    details.en { border: 1px dashed var(--line); border-radius: 12px; padding: 10px 14px; margin: 0 0 16px; }
+    details.en summary { cursor: pointer; font-weight: 700; font-family: var(--display); }
+    .list { display: grid; gap: 10px; }
+    .item { display: grid; grid-template-columns: 72px 1fr auto; gap: 14px; align-items: center; background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+    .item img { width: 72px; height: 54px; object-fit: cover; border-radius: 8px; background: var(--indigo-soft); }
+    .item .thumb { width: 72px; height: 54px; border-radius: 8px; background: var(--indigo-soft); display: grid; place-items: center; color: var(--indigo); font: 700 12px var(--display); }
+    .item b { font-family: var(--display); font-size: 17px; display: block; }
+    .item .meta { color: var(--muted); font-size: 14px; }
+    .item .ops { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+    .item .ops button { border: 1.5px solid var(--line); background: #fff; border-radius: 8px; width: 34px; height: 34px; cursor: pointer; color: var(--indigo); font-size: 16px; }
+    .badge { display: inline-block; border-radius: 999px; padding: 2px 10px; font: 700 12px var(--display); background: var(--indigo-soft); color: var(--indigo-deep); margin-left: 8px; vertical-align: middle; }
+    .badge.off { background: #fdecef; color: #b3261e; }
+    .badge.ok { background: #e6f4ea; color: var(--ok); }
+    .badge.err { background: #fdecef; color: #b3261e; }
+    table.opts { width: 100%; border-collapse: collapse; font-size: 15px; }
+    table.opts th { text-align: left; font-size: 13px; color: var(--muted); font-weight: 600; padding: 0 6px 6px 0; }
+    table.opts td { padding: 0 6px 8px 0; vertical-align: top; }
+    table.opts input, table.opts select { width: 100%; border: 1.5px solid var(--line); border-radius: 8px; padding: 8px 10px; font: inherit; }
+    table.opts td.rm { width: 36px; }
+    table.opts td.rm button { border: 0; background: none; color: #b3261e; font-size: 20px; cursor: pointer; line-height: 1; }
+    .photo { display: flex; gap: 16px; align-items: center; margin: 0 0 14px; }
+    .photo img { width: 160px; height: 120px; object-fit: cover; border-radius: 10px; background: var(--indigo-soft); }
+    .photo input { font-size: 14px; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 18px; }
+    .actions .spacer { flex: 1; }
+    .msg { border-radius: 10px; padding: 10px 14px; font-size: 15px; margin: 0 0 14px; }
+    .msg.err { background: #fdecef; color: #8a1b14; }
+    .msg.ok { background: #e6f4ea; color: #14532d; }
+    .msg.info { background: var(--indigo-soft); color: var(--indigo-deep); }
+    .combo-items { display: grid; gap: 8px; margin-bottom: 14px; }
+    .combo-items .ci { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; border: 1.5px solid var(--line); border-radius: 10px; padding: 8px 12px; }
+    .combo-items .ci select { border: 1.5px solid var(--line); border-radius: 8px; padding: 6px 8px; font: inherit; }
+    .combo-items .ci label { display: flex; align-items: center; gap: 6px; font-size: 14px; white-space: nowrap; }
+    .hist { list-style: none; margin: 0; padding: 0; font-size: 14px; }
+    .hist li { display: flex; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
+    .hist li span:first-child { color: var(--muted); white-space: nowrap; }
+    .login { max-width: 420px; margin: 40px auto; }
+    .login h2 { margin-bottom: 14px; }
+    .dirty { position: fixed; left: 0; right: 0; bottom: 0; background: var(--indigo-deep); color: #fff; padding: 12px 16px; display: flex; gap: 14px; align-items: center; justify-content: center; font-size: 15px; z-index: 6; }
+    .dirty .btn { padding: 8px 16px; }
+    @media (min-width: 760px) { .grid2, .lang2 { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body data-supabase-url={SUPABASE_URL} data-supabase-key={SUPABASE_KEY} data-site={SITE_URL}>
+  <header>
+    <div class="bar">
+      <a href="/" aria-label={BRAND}><img src="/logo.webp" alt={BRAND} width="146" height="34" /></a>
+      <h1>Panel</h1>
+      <div class="who" data-who hidden><span data-email></span><button class="link" type="button" data-logout>Salir</button></div>
+    </div>
+  </header>
+  <main data-app>
+    <section class="card login" data-view="login">
+      <h2>Entrar</h2>
+      <p class="sub">Solo para el administrador del sitio.</p>
+      <form data-login novalidate>
+        <label class="field"><span>Correo</span><input type="email" name="email" autocomplete="username" required /></label>
+        <label class="field"><span>Contraseña</span><input type="password" name="password" autocomplete="current-password" minlength="8" required /></label>
+        <p class="msg err" data-loginmsg hidden></p>
+        <div class="actions">
+          <button class="btn btn-primary" type="submit">Entrar</button>
+          <button class="btn btn-ghost" type="button" data-signup>Crear cuenta</button>
+        </div>
+        <p class="sub" style="margin-top:14px;font-size:14px">La primera vez: "Crear cuenta" con el correo autorizado y una contraseña de al menos 8 caracteres. Si llega un correo de confirmación, ábrelo y vuelve aquí a entrar.</p>
+      </form>
+    </section>
+
+    <section data-view="app" hidden>
+      <ul class="tabs" role="tablist">
+        <li><button type="button" role="tab" data-tab="tours" aria-selected="true">Tours y precios</button></li>
+        <li><button type="button" role="tab" data-tab="combos" aria-selected="false">Combos</button></li>
+        <li><button type="button" role="tab" data-tab="settings" aria-selected="false">Descuentos y WhatsApp</button></li>
+        <li><button type="button" role="tab" data-tab="publish" aria-selected="false">Publicar</button></li>
+      </ul>
+      <p class="msg" data-globalmsg hidden></p>
+      <div data-panel></div>
+    </section>
+  </main>
+  <div class="dirty" data-dirty hidden>
+    <span>Hay cambios guardados que todavía no están en el sitio.</span>
+    <button class="btn btn-primary" type="button" data-gopublish>Publicar ahora</button>
+  </div>
+  <script>
+    import '../admin/app';
+  </script>
+</body>
+</html>

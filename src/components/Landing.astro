@@ -1,13 +1,19 @@
 ---
 // Portada completa. Se renderiza una vez por idioma (src/pages/index.astro = es, src/pages/en.astro = en).
-import { BRAND, SITE_URL, EMAIL, PAYMENTS, COMBO_DISCOUNTS, LOCALES, DESTINATION, waLink, type Lang } from '../config';
+import { BRAND, SITE_URL, EMAIL, PAYMENTS, LOCALES, DESTINATION, waLink, type Lang } from '../config';
 import { DICTS, getServices, getCombos, fill } from '../i18n';
+import { loadCatalog, discountFor } from '../lib/catalog';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = DICTS[lang];
-const SERVICES = getServices(lang);
-const COMBOS = getCombos(lang);
+// Catálogo administrado en /admin (Supabase); se lee al construir el sitio.
+const cat = await loadCatalog();
+const SERVICES = getServices(cat, lang);
+const COMBOS = getCombos(cat, lang, SERVICES);
+const COMBO_DISCOUNTS = cat.discounts;
+// Descuentos en % por 2, 3 y 4 o más tours, para los textos con {d2} {d3} {d4}.
+const D = { d2: Math.round(discountFor(COMBO_DISCOUNTS, 2) * 100), d3: Math.round(discountFor(COMBO_DISCOUNTS, 3) * 100), d4: Math.round(discountFor(COMBO_DISCOUNTS, 4) * 100) };
 const isDefault = lang === LOCALES.default;
 const isPublic = LOCALES.public.includes(lang);
 const path = isDefault ? '/' : `/${lang}`;
@@ -22,7 +28,7 @@ function priceFor(serviceSlug: string, optionId: string, pax: number, rt: boolea
   return o.price * units * (s.roundTrip && rt ? 2 : 1);
 }
 const comboCards = COMBOS.map((c) => {
-  const d = COMBO_DISCOUNTS[c.items.length] || 0;
+  const d = discountFor(COMBO_DISCOUNTS, c.items.length);
   const full = c.items.reduce((acc, i) => acc + priceFor(i.service, i.option, 2, Boolean(i.roundTrip)), 0);
   return {
     ...c, pct: Math.round(d * 100), full, price: Math.round(full * (1 - d)),
@@ -33,24 +39,25 @@ const comboCards = COMBOS.map((c) => {
   };
 });
 const year = new Date().getFullYear();
-const supportLink = waLink(t.support.waMessage);
+const supportLink = waLink(cat.whatsapp, t.support.waMessage);
+const allPrices = SERVICES.flatMap((s) => s.options.map((o) => o.price));
 const ld = [
   {
     '@context': 'https://schema.org', '@type': 'TravelAgency', name: BRAND, url: canonical,
     image: `${SITE_URL}/og.jpg`, description: t.tagline, email: EMAIL,
     areaServed: { '@type': 'Place', name: `${DESTINATION.name}, ${DESTINATION.country[lang]}` },
-    availableLanguage: LOCALES.public, priceRange: '$35 - $140',
+    availableLanguage: LOCALES.public, priceRange: `${Math.min(...allPrices)} - ${Math.max(...allPrices)}`,
     makesOffer: SERVICES.map((s) => ({ '@type': 'Offer', name: s.name, price: s.from, priceCurrency: 'USD' })),
   },
   {
     '@context': 'https://schema.org', '@type': 'FAQPage',
-    mainEntity: t.faq.items.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+    mainEntity: t.faq.items.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: fill(f.a, D) } })),
   },
 ];
 // Datos mínimos para calcular el total en el navegador (sin costos de operador).
 const catalog = SERVICES.map((s) => ({
   slug: s.slug, name: s.name, roundTrip: Boolean(s.roundTrip), minPax: s.minPax, maxPax: s.maxPax,
-  options: s.options.map((o) => ({ ...o, label: s.optionLabel(o.id) })),
+  options: s.options,
 }));
 // Teléfonos del hero: video real de Andrés (public/media, generado con assets-src/make_media.py).
 const phones = [
@@ -62,7 +69,7 @@ const front = phones.find((p) => p.pos === 'center')!;
 const pending = PAYMENTS.provider === 'pending';
 const combos = COMBOS.map((c) => ({ slug: c.slug, items: c.items }));
 const discounts = COMBO_DISCOUNTS;
-const J = { ...t.checkout, u: t.units };
+const J = { ...t.checkout, oneTour: fill(t.checkout.oneTour, D), u: t.units };
 ---
 <!doctype html>
 <html lang={lang}>
@@ -255,6 +262,7 @@ const J = { ...t.checkout, u: t.units };
 
     .who { display: grid; gap: 20px; grid-template-columns: 1fr; align-items: start; }
     .who .ph { width: 120px; height: 120px; border-radius: 50%; background: var(--surface); border: 1px solid var(--line); display: grid; place-items: center; color: var(--muted); font-size: 13px; text-align: center; padding: 10px; }
+    .who img.ph { object-fit: cover; padding: 0; }
     .who p { margin: 0 0 12px; }
 
     details { border-top: 1px solid var(--line); padding: 14px 0; }
@@ -422,7 +430,7 @@ const J = { ...t.checkout, u: t.units };
         <div class="board">
           {SERVICES.map((s) => (
             <article class="row reveal" id={s.slug}>
-              <img src={s.image} srcset={`${s.image} 480w, ${s.image.replace("-480", "-960")} 960w`} sizes="(min-width: 900px) 210px, 100vw" width="480" height="360" alt={s.alt} loading="lazy" decoding="async" />
+              <img src={s.image480} srcset={`${s.image480} 480w, ${s.image960} 960w`} sizes="(min-width: 900px) 210px, 100vw" width="480" height="360" alt={s.alt} loading="lazy" decoding="async" />
               <div>
                 <h3>{s.name}</h3>
                 <p class="time">{s.time}</p>
@@ -442,7 +450,7 @@ const J = { ...t.checkout, u: t.units };
     <section class="surface" id="combos">
       <div class="wrap">
         <h2>{t.combos.h2}</h2>
-        <p class="sub">{t.combos.sub}</p>
+        <p class="sub">{fill(t.combos.sub, D)}</p>
         <div class="board combos">
           {comboCards.map((c) => (
             <article class="row reveal" id={`combo-${c.slug}`}>
@@ -495,7 +503,7 @@ const J = { ...t.checkout, u: t.units };
       <div class="wrap">
         <h2>{t.who.h2}</h2>
         <div class="who">
-          <div class="ph">{t.who.photoSoon}</div>
+          <img class="ph" src="/img/andres-240.webp" srcset="/img/andres-240.webp 1x, /img/andres-480.webp 2x" width="120" height="120" alt={t.who.photoAlt} loading="lazy" decoding="async" />
           <div>
             <p set:html={fill(t.who.p1, { brand: BRAND })} />
             <p>{fill(t.who.p2, { brand: BRAND, year })}</p>
@@ -511,7 +519,7 @@ const J = { ...t.checkout, u: t.units };
         {t.faq.items.map((f) => (
           <details>
             <summary>{f.q}</summary>
-            <p>{f.a}</p>
+            <p>{fill(f.a, D)}</p>
           </details>
         ))}
       </div>
