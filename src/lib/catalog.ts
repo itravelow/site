@@ -37,12 +37,30 @@ export function discountFor(discounts: Record<number, number>, n: number): numbe
 type Row = Record<string, any>;
 const toUnit = (u: string): Unit => (u === 'vehiculo' ? 'vehículo' : 'persona');
 
+// GET con node:https sin keep-alive. Con fetch (undici), Node 24 en Windows a veces aborta al
+// salir ("Assertion failed: !(handle->flags & UV_HANDLE_CLOSING)") y el deploy no sigue.
+async function getJson(fullUrl: string, headers: Record<string, string>): Promise<Row[]> {
+  const https = await import('node:https');
+  return new Promise((resolve, reject) => {
+    const req = https.get(fullUrl, { headers, agent: false }, (res) => {
+      const chunks: Buffer[] = [];
+      res.on('data', (c: Buffer) => chunks.push(c));
+      res.on('end', () => {
+        const body = Buffer.concat(chunks).toString('utf8');
+        if ((res.statusCode || 500) >= 400) reject(new Error(`${res.statusCode} ${body.slice(0, 300)}`));
+        else { try { resolve(JSON.parse(body)); } catch (e) { reject(e); } }
+      });
+    });
+    req.on('error', reject);
+    req.setTimeout(15000, () => req.destroy(new Error('timeout')));
+  });
+}
+
 export async function fetchCatalog(url: string, key: string): Promise<Catalog> {
   const headers = { apikey: key, Authorization: `Bearer ${key}` };
   const get = async (path: string): Promise<Row[]> => {
-    const r = await fetch(`${url}/rest/v1/${path}`, { headers });
-    if (!r.ok) throw new Error(`Supabase ${path}: ${r.status} ${await r.text()}`);
-    return r.json();
+    try { return await getJson(`${url}/rest/v1/${path}`, headers); }
+    catch (e) { throw new Error(`Supabase ${path}: ${(e as Error).message}`); }
   };
   const [services, combos, settings] = await Promise.all([
     get('itw_services?select=*,itw_service_options(*)&published=is.true&order=sort.asc,slug.asc&itw_service_options.order=sort.asc'),
