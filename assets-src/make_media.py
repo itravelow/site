@@ -2,13 +2,16 @@
 
 Uso:
   python assets-src/make_media.py                 # procesa todo lo que haya en media/raw/
-  python assets-src/make_media.py --start 4       # videos: empezar en el segundo 4
   python assets-src/make_media.py --no-upscale    # fotos: sin escalado en kie.ai
+  python assets-src/make_media.py --only buggy    # solo una pantalla
 
-Entrada: assets-src/media/raw/<pantalla>.<ext>  (pantalla = avion | saona | buggy)
-Salida:  public/media/phone-<pantalla>.webp  y, si hay video, .mp4 + .webm
-Requiere ffmpeg en el PATH. El escalado usa recraft/crisp-upscale en kie.ai (KIE_API_KEY);
-kie.ai necesita una URL pública para la imagen, así que se sube primero a su API de archivos.
+Entrada: assets-src/media/raw/<pantalla>.<ext>  (pantalla = avion | buggy | cocobongo | ...)
+Cortes:  assets-src/media/raw/cuts.json  {"avion": {"start": 0, "duration": 16}, ...}
+         (sin entrada: empieza en 0 y dura 12 s)
+Salida:  public/media/phone-<pantalla>.webp  y, si hay video, .mp4 (540x960, 24 fps, <= ~1.5 MB)
+Requiere ffmpeg en el PATH (aplica solo la rotación del iPhone). El escalado de fotos usa
+recraft/crisp-upscale en kie.ai (KIE_API_KEY); kie.ai necesita una URL pública para la
+imagen, así que se sube primero a su API de archivos. Los videos no se tocan con IA.
 """
 import os, sys, json, time, io, base64, subprocess, urllib.request
 from PIL import Image, ImageOps
@@ -17,13 +20,15 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 SITE = os.path.dirname(ROOT)
 RAW = os.path.join(ROOT, "media", "raw")
 OUT = os.path.join(SITE, "public", "media")
-IMG = {".jpg", ".jpeg", ".png", ".webp"}
+IMG = {".jpg", ".jpeg", ".png", ".webp", ".heic"}
 VID = {".mp4", ".mov", ".m4v", ".webm"}
 args = sys.argv[1:]
-start = "0"
-if "--start" in args:
-    start = args[args.index("--start") + 1]
+only = args[args.index("--only") + 1] if "--only" in args else None
 upscale = "--no-upscale" not in args and bool(os.environ.get("KIE_API_KEY"))
+cuts = {}
+if os.path.exists(os.path.join(RAW, "cuts.json")):
+    with open(os.path.join(RAW, "cuts.json"), encoding="utf-8") as fh:
+        cuts = json.load(fh)
 
 
 def kie(method, path, body=None, raw=None, ctype="application/json"):
@@ -52,7 +57,7 @@ def upscale_png(png_bytes):
     return png_bytes
 
 
-def to_9x16(im, w=720, h=1280):
+def to_9x16(im, w=540, h=960):
     im = ImageOps.exif_transpose(im).convert("RGB")
     return ImageOps.fit(im, (w, h), Image.LANCZOS, centering=(0.5, 0.5))
 
@@ -60,6 +65,8 @@ def to_9x16(im, w=720, h=1280):
 os.makedirs(OUT, exist_ok=True)
 for f in sorted(os.listdir(RAW)) if os.path.isdir(RAW) else []:
     name, ext = os.path.splitext(f.lower())
+    if only and name != only:
+        continue
     src = os.path.join(RAW, f)
     if ext in IMG:
         im = Image.open(src)
@@ -69,12 +76,15 @@ for f in sorted(os.listdir(RAW)) if os.path.isdir(RAW) else []:
         to_9x16(im).save(os.path.join(OUT, f"phone-{name}.webp"), "WEBP", quality=80, method=6)
         print("imagen ok", name)
     elif ext in VID:
-        vf = "scale=720:1280:force_original_aspect_ratio=increase,crop=720:1280,fps=24"
-        base = ["ffmpeg", "-y", "-ss", start, "-t", "6", "-i", src, "-an", "-vf", vf]
-        subprocess.run(base + ["-c:v", "libx264", "-profile:v", "main", "-pix_fmt", "yuv420p", "-crf", "30", "-preset", "slow", "-movflags", "+faststart", os.path.join(OUT, f"phone-{name}.mp4")], check=True)
-        subprocess.run(base + ["-c:v", "libvpx-vp9", "-b:v", "0", "-crf", "38", "-row-mt", "1", os.path.join(OUT, f"phone-{name}.webm")], check=True)
-        # cartel (poster) desde el primer fotograma
-        subprocess.run(["ffmpeg", "-y", "-ss", start, "-i", src, "-frames:v", "1", "-vf", vf, os.path.join(ROOT, "media", f"{name}-poster.png")], check=True)
-        to_9x16(Image.open(os.path.join(ROOT, "media", f"{name}-poster.png"))).save(os.path.join(OUT, f"phone-{name}.webp"), "WEBP", quality=80, method=6)
-        print("video ok", name)
-print("listo. Si agregaste video a una pantalla sin video, pon data-video en src/pages/index.astro (lista `phones`).")
+        c = cuts.get(name, {})
+        start, dur = str(c.get("start", 0)), str(c.get("duration", 12))
+        vf = "scale=540:960:force_original_aspect_ratio=increase,crop=540:960,fps=24"
+        base = ["ffmpeg", "-v", "error", "-y", "-ss", start, "-t", dur, "-i", src, "-an", "-vf", vf]
+        subprocess.run(base + ["-c:v", "libx264", "-profile:v", "main", "-pix_fmt", "yuv420p", "-crf", "30", "-maxrate", "750k", "-bufsize", "1500k", "-preset", "slow", "-movflags", "+faststart", os.path.join(OUT, f"phone-{name}.mp4")], check=True)
+        # cartel (poster) desde el primer fotograma del corte
+        poster = os.path.join(ROOT, "media", f"{name}-poster.png")
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", start, "-i", src, "-frames:v", "1", "-vf", vf, poster], check=True)
+        to_9x16(Image.open(poster)).save(os.path.join(OUT, f"phone-{name}.webp"), "WEBP", quality=80, method=6)
+        for e in ("mp4", "webp"):
+            p = os.path.join(OUT, f"phone-{name}.{e}"); print(f"video ok {name}.{e} {os.path.getsize(p) // 1024} KB")
+print("listo. Si agregaste una pantalla nueva, ponla en la lista `phones` de src/components/Landing.astro.")
