@@ -127,6 +127,38 @@ export const SERVICES: Service[] = [
   },
 ];
 
+// Descuento por combinar varios tours en una misma reserva (poco, pero visible).
+export const COMBO_DISCOUNTS: Record<number, number> = { 2: 0.05, 3: 0.08, 4: 0.1 };
+
+export interface Combo {
+  slug: string;
+  name: string;
+  blurb: string;
+  items: { service: string; option: string; roundTrip?: boolean }[];
+}
+
+// Combos sugeridos: prellenan el carrito; el descuento sale de COMBO_DISCOUNTS según cuántos tours lleve.
+export const COMBOS: Combo[] = [
+  {
+    slug: 'llegada-saona',
+    name: 'Llegada tranquila + Isla Saona',
+    blurb: 'Te recogen en el aeropuerto, te llevan de vuelta al final y un día completo en Saona.',
+    items: [{ service: 'traslados', option: 'auto', roundTrip: true }, { service: 'saona', option: 'adulto' }],
+  },
+  {
+    slug: 'aventura',
+    name: 'Aventura: buggies + Saona + traslados',
+    blurb: 'Traslado ida y vuelta, una mañana de buggies en Macao y el día de catamarán a Saona.',
+    items: [{ service: 'traslados', option: 'auto', roundTrip: true }, { service: 'buggies', option: 'doble' }, { service: 'saona', option: 'adulto' }],
+  },
+  {
+    slug: 'todo',
+    name: 'Todo Punta Cana',
+    blurb: 'Los cuatro: traslados ida y vuelta, buggies, Saona y la noche de Coco Bongo.',
+    items: [{ service: 'traslados', option: 'auto', roundTrip: true }, { service: 'buggies', option: 'doble' }, { service: 'saona', option: 'adulto' }, { service: 'coco-bongo', option: 'regular' }],
+  },
+];
+
 export const FAQ = [
   {
     q: '¿Cuánto cuesta el taxi del aeropuerto de Punta Cana a Bávaro?',
@@ -139,6 +171,10 @@ export const FAQ = [
   {
     q: '¿Cómo se paga?',
     a: 'Reservas en esta página y pagas con tarjeta en un enlace de pago seguro. Nosotros coordinamos y pagamos al operador que presta el servicio. El día del servicio no tienes que pagar nada más, salvo propinas si quieres darlas.',
+  },
+  {
+    q: '¿Hay descuento si reservo varios tours?',
+    a: 'Sí. Dos tours en la misma reserva tienen 5 % de descuento, tres tienen 8 % y los cuatro, 10 %. El descuento se aplica solo en el total antes de pagar; no hace falta código.',
   },
   {
     q: '¿Puedo cancelar?',

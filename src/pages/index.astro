@@ -1,5 +1,22 @@
 ---
-import { BRAND, TAGLINE, EMAIL, SERVICES, FAQ, PAYMENTS, waLink } from '../config';
+import { BRAND, TAGLINE, EMAIL, SERVICES, FAQ, PAYMENTS, COMBOS, COMBO_DISCOUNTS, waLink } from '../config';
+function priceFor(serviceSlug: string, optionId: string, pax: number, rt: boolean): number {
+  const s = SERVICES.find((x) => x.slug === serviceSlug)!;
+  const o = s.options.find((x) => x.id === optionId) || s.options[0];
+  const units = o.unit === 'vehículo' ? Math.ceil(pax / (o.capacity || 4)) : pax;
+  return o.price * units * (s.roundTrip && rt ? 2 : 1);
+}
+const comboCards = COMBOS.map((c) => {
+  const d = COMBO_DISCOUNTS[c.items.length] || 0;
+  const full = c.items.reduce((acc, i) => acc + priceFor(i.service, i.option, 2, Boolean(i.roundTrip)), 0);
+  return {
+    ...c, pct: Math.round(d * 100), full, price: Math.round(full * (1 - d)),
+    lines: c.items.map((i) => {
+      const sv = SERVICES.find((x) => x.slug === i.service)!; const op = sv.options.find((x) => x.id === i.option)!;
+      return `${sv.name}: ${op.label}${i.roundTrip ? ', ida y vuelta' : ''}`;
+    }),
+  };
+});
 const year = new Date().getFullYear();
 const supportLink = waLink('Hola, tengo una pregunta sobre una reserva en iTravelow.');
 const ld = [
@@ -23,6 +40,8 @@ const phones = [
   { pos: 'right', img: '/media/phone-buggy.webp', alt: 'Camino de tierra roja entre cañaverales cerca de Macao', video: '' },
 ];
 const pending = PAYMENTS.provider === 'pending';
+const combos = COMBOS;
+const discounts = COMBO_DISCOUNTS;
 ---
 <!doctype html>
 <html lang="es">
@@ -66,6 +85,7 @@ const pending = PAYMENTS.provider === 'pending';
       --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
     }
     * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
     html { scroll-behavior: smooth; }
     body {
       margin: 0; color: var(--ink); background: var(--bg);
@@ -91,7 +111,7 @@ const pending = PAYMENTS.provider === 'pending';
 
     header { position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,0.92); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
     .nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0; }
-    .nav img { height: 32px; width: auto; }
+    .nav img { height: 38px; width: auto; }
     .nav nav { display: none; gap: 26px; font-size: 15.5px; }
     .nav nav a { color: var(--ink); text-decoration: none; padding: 4px 0; border-bottom: 2px solid transparent; transition: border-color 160ms ease; }
     .nav nav a:hover { border-bottom-color: var(--magenta); }
@@ -143,6 +163,23 @@ const pending = PAYMENTS.provider === 'pending';
     .price small { display: block; font-weight: 600; font-size: 14px; color: var(--muted); margin-top: 6px; }
     .price .desde { font-size: 15px; font-weight: 600; color: var(--indigo); display: block; margin-bottom: 4px; }
 
+    .board.combos .row { grid-template-columns: 1fr; }
+    .board.combos h3 { font-size: 23px; }
+    .board.combos .blurb { margin: 0 0 10px; color: var(--muted); font-size: 15.5px; }
+    .crumb { color: var(--muted); font-size: 14px; margin: 0 0 10px; }
+    .cart { list-style: none; margin: 0 0 12px; padding: 0; }
+    .cart li { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+    .cart li b { font-family: var(--display); }
+    .cart li .meta { color: var(--muted); grid-column: 1; }
+    .cart li .ops { grid-column: 1 / -1; display: flex; gap: 14px; }
+    .cart li .ops button { border: 0; background: none; color: var(--indigo); cursor: pointer; padding: 0; font: 700 14px var(--display); }
+    .addmore { background: var(--surface); border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; font-size: 15px; }
+    .addmore strong { display: block; margin-bottom: 8px; font-family: var(--display); }
+    .addmore .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip { border: 1.5px solid var(--indigo); color: var(--indigo); background: #fff; border-radius: 999px; padding: 6px 12px; font: 700 14px var(--display); cursor: pointer; transition: background-color 160ms ease, transform 160ms var(--ease-out); }
+    .chip:hover { background: var(--indigo-soft); }
+    .chip:active { transform: scale(0.97); }
+    .total .off { color: var(--magenta-ink); font-weight: 700; }
     .reveal { opacity: 0; transform: translateY(14px); transition: opacity 500ms var(--ease-out), transform 500ms var(--ease-out); }
     .reveal[data-visible] { opacity: 1; transform: none; }
     .reveal:nth-child(2) { transition-delay: 60ms; }
@@ -154,7 +191,7 @@ const pending = PAYMENTS.provider === 'pending';
     .steps li { position: relative; padding: 0 0 26px 38px; }
     .steps li::before { content: ""; position: absolute; left: 9px; top: 10px; width: 2px; height: calc(100% - 4px); background: var(--line); }
     .steps li:last-child::before { display: none; }
-    .steps li::after { content: ""; position: absolute; left: 3px; top: 7px; width: 14px; height: 14px; border-radius: 50%; background: var(--magenta); box-shadow: 0 0 0 4px var(--surface); }
+    .steps li::after { content: ""; position: absolute; left: 3px; top: 7px; width: 14px; height: 14px; border-radius: 50%; background: var(--magenta); box-shadow: 0 0 0 4px #fff; }
     .steps strong { display: block; font-family: var(--display); font-size: 21px; font-weight: 700; margin-bottom: 4px; }
     .steps p { margin: 0; color: var(--muted); }
     .confirm { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 18px 18px 14px; max-width: 440px; width: 100%; margin: 0 auto; box-shadow: 0 20px 50px -30px rgba(0,0,0,0.25); }
@@ -248,7 +285,6 @@ const pending = PAYMENTS.provider === 'pending';
     .stepper button:hover { background: var(--indigo-soft); }
     .stepper output { min-width: 48px; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
     .check { display: flex; align-items: center; gap: 10px; margin: 4px 0 14px; cursor: pointer; }
-    .check[hidden] { display: none; }
     .total { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; border-top: 2px solid var(--indigo); padding-top: 12px; margin: 8px 0 14px; }
     .total strong { font-family: var(--display); font-size: 30px; font-weight: 800; color: var(--magenta-ink); font-variant-numeric: tabular-nums; }
     .total small { color: var(--muted); font-size: 14px; }
@@ -280,6 +316,7 @@ const pending = PAYMENTS.provider === 'pending';
 
     @media (min-width: 900px) {
       .nav nav { display: flex; }
+      .nav img { height: 44px; }
       .hero::before { clip-path: polygon(59% 0, 100% 0, 100% 100%, 41% 100%); }
       .hero::after { clip-path: polygon(59% 0, 60.4% 0, 42.4% 100%, 41% 100%); }
       .hero .wrap { grid-template-columns: 1.05fr 1fr; gap: 24px; padding-top: 56px; padding-bottom: 56px; align-items: center; }
@@ -287,6 +324,7 @@ const pending = PAYMENTS.provider === 'pending';
       .phone { width: 220px; }
       .row { grid-template-columns: 210px 1fr 220px; }
       .row .buy { align-items: flex-end; text-align: right; }
+      .board.combos .row { grid-template-columns: 1fr 260px; }
       .how { grid-template-columns: 1fr 1fr; gap: 56px; }
       .trust { grid-template-columns: 1fr 1fr; }
       .who { grid-template-columns: 140px 1fr; }
@@ -298,9 +336,10 @@ const pending = PAYMENTS.provider === 'pending';
 <body>
   <header>
     <div class="wrap nav">
-      <a href="/" aria-label={BRAND}><img src="/logo.webp" alt={BRAND} width="150" height="32" /></a>
+      <a href="/" aria-label={BRAND}><img src="/logo.webp" alt={BRAND} width="189" height="44" /></a>
       <nav aria-label="Secciones">
         <a href="#tours">Tours y precios</a>
+        <a href="#combos">Combos</a>
         <a href="#como-funciona">Cómo funciona</a>
         <a href="#confianza">Confianza</a>
         <a href="#preguntas">Preguntas</a>
@@ -360,7 +399,29 @@ const pending = PAYMENTS.provider === 'pending';
       </div>
     </section>
 
-    <section class="surface" id="como-funciona">
+    <section class="surface" id="combos">
+      <div class="wrap">
+        <h2>Combos con descuento</h2>
+        <p class="sub">Dos tours en la misma reserva: 5 % menos. Tres: 8 %. Los cuatro: 10 %. También aplica si los combinas tú desde cualquier botón "Reservar".</p>
+        <div class="board combos">
+          {comboCards.map((c) => (
+            <article class="row reveal" id={`combo-${c.slug}`}>
+              <div>
+                <h3>{c.name}</h3>
+                <p class="blurb">{c.blurb}</p>
+                <ul>{c.lines.map((l) => <li>{l}</li>)}</ul>
+              </div>
+              <div class="buy">
+                <p class="price"><span class="desde">{c.pct} % de descuento</span>{c.price} USD<small>para 2 personas, en vez de {c.full} USD</small></p>
+                <button class="btn btn-primary btn-sm" type="button" data-combo={c.slug}>Reservar combo</button>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section id="como-funciona">
       <div class="wrap how">
         <div>
           <h2>Cómo funciona</h2>
@@ -460,20 +521,32 @@ const pending = PAYMENTS.provider === 'pending';
         <button class="close" type="button" aria-label="Cerrar" data-close>×</button>
       </div>
 
-      <div class="step" data-step="1" data-active>
+      <div class="step" data-step="item" data-active>
+        <p class="crumb" data-crumb hidden></p>
         <div class="field"><span>Opción</span><div class="opts" data-opts></div></div>
         <label class="field"><span>Fecha del servicio</span><input type="date" name="fecha" required /></label>
         <div class="field"><span>Personas</span>
           <div class="stepper"><button type="button" data-dec aria-label="Menos">−</button><output data-pax>2</output><button type="button" data-inc aria-label="Más">+</button></div>
         </div>
         <label class="check" data-rt hidden><input type="checkbox" name="idaVuelta" /> Ida y vuelta (aeropuerto a hotel y de regreso)</label>
-        <label class="field"><span>Hotel o zona</span><input type="text" name="hotel" placeholder="Ej. Bahía Príncipe Bávaro" required /></label>
-        <p class="err" data-err1>Falta la fecha o el hotel.</p>
-        <div class="total"><span>Total<br /><small data-detail></small></span><strong data-total>0 USD</strong></div>
-        <div class="actions"><button class="btn btn-primary" type="button" data-next>Continuar</button></div>
+        <p class="err" data-err1>Falta la fecha.</p>
+        <div class="total"><span>Este tour<br /><small data-detail></small></span><strong data-itemtotal>0 USD</strong></div>
+        <div class="actions"><button class="btn btn-ghost" type="button" data-cancelitem hidden>Atrás</button><button class="btn btn-primary" type="button" data-next>Continuar</button></div>
       </div>
 
-      <div class="step" data-step="2">
+      <div class="step" data-step="cart">
+        <ul class="cart" data-cart></ul>
+        <div class="addmore" data-addmore>
+          <strong data-addtitle>Añade otro tour y ahorra 5 %</strong>
+          <div class="chips" data-addbtns></div>
+        </div>
+        <label class="field"><span>Hotel o zona</span><input type="text" name="hotel" placeholder="Ej. Bahía Príncipe Bávaro" required /></label>
+        <p class="err" data-errcart>Falta el hotel.</p>
+        <div class="total"><span>Total<br /><small data-discount></small></span><strong data-total>0 USD</strong></div>
+        <div class="actions"><button class="btn btn-primary" type="button" data-tocontact>Continuar</button></div>
+      </div>
+
+      <div class="step" data-step="contact">
         <label class="field"><span>Tu nombre</span><input type="text" name="nombre" autocomplete="name" required /></label>
         <label class="field"><span>WhatsApp (con código de país)</span><input type="tel" name="whatsapp" autocomplete="tel" placeholder="+57 300 000 0000" required /></label>
         <label class="field"><span>Correo</span><input type="email" name="correo" autocomplete="email" required /></label>
@@ -486,7 +559,7 @@ const pending = PAYMENTS.provider === 'pending';
         <p class="hint">{pending ? 'No se cobra nada ahora. Recibes el enlace de pago seguro en menos de 1 hora y la reserva queda firme cuando pagas.' : 'Pago seguro con tarjeta. La reserva queda firme al pagar.'}</p>
       </div>
 
-      <div class="step done" data-step="3">
+      <div class="step done" data-step="done">
         <div class="ok" aria-hidden="true">✓</div>
         <h3>Reserva recibida</h3>
         <p data-donemsg>Te enviamos el enlace de pago y la confirmación en menos de 1 hora.</p>
@@ -499,7 +572,7 @@ const pending = PAYMENTS.provider === 'pending';
     </form>
   </dialog>
 
-  <script is:inline define:vars={{ catalog, EMAIL, pending }}>
+  <script is:inline define:vars={{ catalog, combos, discounts, EMAIL, pending }}>
     // 1. Teléfonos: video solo con wifi (o escritorio sin datos de conexión); con datos móviles, imágenes.
     (function () {
       var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -551,50 +624,92 @@ const pending = PAYMENTS.provider === 'pending';
       });
     })();
 
-    // 5. Flujo de reserva.
+    // 5. Flujo de reserva con varios tours y descuento por combo.
     (function () {
       var dlg = document.querySelector('[data-checkout]'); var form = dlg.querySelector('[data-form]');
       var q = function (s) { return dlg.querySelector(s); };
-      var state = { service: null, option: null, pax: 2, rt: false };
+      var state = { pax: 2, items: [], editing: 0, backToCart: false };
+      var svc = function (slug) { return catalog.filter(function (s) { return s.slug === slug; })[0]; };
+      var opt = function (s, id) { return s.options.filter(function (x) { return x.id === id; })[0] || s.options[0]; };
 
-      function compute() {
-        var s = state.service; var o = s.options.filter(function (x) { return x.id === state.option; })[0] || s.options[0];
-        var units, total, detail;
+      function priceOf(it) {
+        var s = svc(it.slug); var o = opt(s, it.option); var units, total, detail;
         if (o.unit === 'vehículo') { units = Math.ceil(state.pax / (o.capacity || 4)); total = o.price * units; detail = units + (units === 1 ? ' vehículo' : ' vehículos') + ' de ' + o.price + ' USD'; }
         else { units = state.pax; total = o.price * units; detail = units + (units === 1 ? ' persona' : ' personas') + ' de ' + o.price + ' USD'; }
-        if (s.roundTrip && state.rt) { total *= 2; detail += ', ida y vuelta'; }
-        return { option: o, total: total, detail: detail };
+        if (s.roundTrip && it.rt) { total *= 2; detail += ', ida y vuelta'; }
+        return { s: s, o: o, total: total, detail: detail, label: o.label + (s.roundTrip && it.rt ? ', ida y vuelta' : '') };
       }
-      function optionLabel(r) { return r.option.label + (state.service.roundTrip && state.rt ? ', ida y vuelta' : ''); }
-      function render() {
-        var r = compute();
-        q('[data-pax]').value = state.pax;
-        q('[data-total]').textContent = r.total + ' USD';
-        q('[data-detail]').textContent = r.detail;
+      var MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+      function fmtDate(d) { var p = d.split('-'); return p.length === 3 ? parseInt(p[2], 10) + ' ' + MESES[parseInt(p[1], 10) - 1] + ' ' + p[0] : d; }
+      function pct(n) { var d = 0; Object.keys(discounts).map(Number).sort().forEach(function (k) { if (n >= k) d = discounts[k]; }); return d; }
+      function totals() {
+        var sub = 0; state.items.forEach(function (it) { sub += priceOf(it).total; });
+        var d = pct(state.items.length); var off = Math.round(sub * d);
+        return { sub: sub, d: d, off: off, total: sub - off };
       }
       function goto(n) {
-        dlg.querySelectorAll('.step').forEach(function (st) { st.toggleAttribute('data-active', st.getAttribute('data-step') === String(n)); });
+        dlg.querySelectorAll('.step').forEach(function (st) { st.toggleAttribute('data-active', st.getAttribute('data-step') === n); });
         form.scrollTop = 0;
       }
-      function open(slug) {
-        state.service = catalog.filter(function (s) { return s.slug === slug; })[0]; if (!state.service) return;
-        state.option = state.service.options[0].id; state.pax = 2; state.rt = false;
-        q('[data-title]').textContent = state.service.name;
+      function renderItem() {
+        var it = state.items[state.editing]; var s = svc(it.slug);
+        q('[data-title]').textContent = s.name;
+        var crumb = q('[data-crumb]'); var n = state.items.length;
+        crumb.hidden = n < 2; crumb.textContent = 'Tour ' + (state.editing + 1) + ' de ' + n;
         var opts = q('[data-opts]'); opts.innerHTML = '';
-        state.service.options.forEach(function (o, i) {
+        s.options.forEach(function (o) {
           var l = document.createElement('label'); l.className = 'opt';
           l.innerHTML = '<input type="radio" name="opcion"><span></span><b></b>';
-          l.querySelector('input').value = o.id; l.querySelector('input').checked = i === 0;
+          var inp = l.querySelector('input'); inp.value = o.id; inp.checked = o.id === it.option;
           l.querySelector('span').textContent = o.label; l.querySelector('b').textContent = o.price + ' USD / ' + o.unit;
-          l.querySelector('input').addEventListener('change', function () { state.option = o.id; render(); });
+          inp.addEventListener('change', function () { it.option = o.id; renderTotals(); });
           opts.appendChild(l);
         });
-        var rt = q('[data-rt]'); rt.hidden = !state.service.roundTrip; rt.querySelector('input').checked = false;
-        var f = form.elements.fecha; var t = new Date(); t.setDate(t.getDate() + 1); f.min = t.toISOString().slice(0, 10); f.value = '';
-        form.elements.hotel.value = '';
-        q('[data-err1]').removeAttribute('data-show'); q('[data-err2]').removeAttribute('data-show');
-        q('[data-copy]').textContent = 'Copiar resumen';
-        goto(1); render();
+        var f = form.elements.fecha; var t = new Date(); t.setDate(t.getDate() + 1); f.min = t.toISOString().slice(0, 10); f.value = it.date || '';
+        var rt = q('[data-rt]'); rt.hidden = !s.roundTrip; rt.querySelector('input').checked = Boolean(it.rt);
+        q('[data-cancelitem]').hidden = !state.backToCart;
+        q('[data-err1]').removeAttribute('data-show');
+        renderTotals(); goto('item');
+      }
+      function renderTotals() {
+        q('[data-pax]').value = state.pax;
+        var it = state.items[state.editing]; if (it) { var r = priceOf(it); q('[data-itemtotal]').textContent = r.total + ' USD'; q('[data-detail]').textContent = r.detail; }
+      }
+      function renderCart() {
+        q('[data-title]').textContent = state.items.length > 1 ? 'Tu reserva, ' + state.items.length + ' tours' : 'Tu reserva';
+        var ul = q('[data-cart]'); ul.innerHTML = '';
+        state.items.forEach(function (it, i) {
+          var r = priceOf(it); var li = document.createElement('li');
+          li.innerHTML = '<b></b><span class="p"></span><span class="meta"></span><span class="ops"><button type="button" data-edit>Cambiar</button><button type="button" data-remove>Quitar</button></span>';
+          li.querySelector('b').textContent = r.s.name; li.querySelector('.p').textContent = r.total + ' USD';
+          li.querySelector('.meta').textContent = r.label + ', ' + fmtDate(it.date) + ', ' + state.pax + (state.pax === 1 ? ' persona' : ' personas');
+          li.querySelector('[data-edit]').addEventListener('click', function () { state.editing = i; state.backToCart = true; renderItem(); });
+          var rm = li.querySelector('[data-remove]'); rm.hidden = state.items.length < 2;
+          rm.addEventListener('click', function () { state.items.splice(i, 1); renderCart(); });
+          ul.appendChild(li);
+        });
+        var missing = catalog.filter(function (s) { return !state.items.some(function (it) { return it.slug === s.slug; }); });
+        var box = q('[data-addmore]'); box.hidden = missing.length === 0;
+        var next = pct(state.items.length + 1); var cur = pct(state.items.length);
+        q('[data-addtitle]').textContent = next > cur ? 'Añade otro tour y el descuento sube a ' + Math.round(next * 100) + ' %' : 'Añade otro tour a la misma reserva';
+        var chips = q('[data-addbtns]'); chips.innerHTML = '';
+        missing.forEach(function (s) {
+          var b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = '+ ' + s.name;
+          b.addEventListener('click', function () { state.items.push({ slug: s.slug, option: s.options[0].id, date: '', rt: false }); state.editing = state.items.length - 1; state.backToCart = true; renderItem(); });
+          chips.appendChild(b);
+        });
+        var t = totals(); q('[data-total]').textContent = t.total + ' USD';
+        var disc = q('[data-discount]'); disc.innerHTML = '';
+        if (t.off) { var sp = document.createElement('span'); sp.className = 'off'; sp.textContent = state.items.length + ' tours: ' + Math.round(t.d * 100) + ' % de descuento, −' + t.off + ' USD'; disc.appendChild(sp); }
+        else if (state.items.length === 1) disc.textContent = 'Un tour. Con dos, 5 % de descuento.';
+        q('[data-errcart]').removeAttribute('data-show');
+        goto('cart');
+      }
+      function openWith(items) {
+        if (!items.length) return;
+        state.items = items; state.editing = 0; state.backToCart = false; state.pax = 2;
+        form.elements.hotel.value = ''; q('[data-err2]').removeAttribute('data-show'); q('[data-copy]').textContent = 'Copiar resumen';
+        renderItem();
         dlg.showModal(); requestAnimationFrame(function () { requestAnimationFrame(function () { dlg.removeAttribute('data-closed'); }); });
       }
       function close() {
@@ -602,29 +717,50 @@ const pending = PAYMENTS.provider === 'pending';
         var done = false; var end = function () { if (!done) { done = true; dlg.close(); } };
         q('.sheet').addEventListener('transitionend', end, { once: true }); setTimeout(end, 550);
       }
-      function summaryText() {
-        var r = compute(); var e = form.elements;
-        return ['Reserva iTravelow', 'Servicio: ' + state.service.name + ' (' + optionLabel(r) + ')',
-          'Fecha: ' + e.fecha.value, 'Personas: ' + state.pax, 'Hotel: ' + e.hotel.value, 'Total: ' + r.total + ' USD',
-          'Nombre: ' + e.nombre.value, 'WhatsApp: ' + e.whatsapp.value, 'Correo: ' + e.correo.value].join('\n');
+      function summaryLines() {
+        var e = form.elements; var t = totals(); var lines = [];
+        state.items.forEach(function (it) { var r = priceOf(it); lines.push([r.s.name, r.label + ', ' + fmtDate(it.date) + ', ' + r.total + ' USD']); });
+        lines.push(['Personas', String(state.pax)]); lines.push(['Hotel', e.hotel.value]);
+        if (t.off) lines.push(['Descuento combo', Math.round(t.d * 100) + ' %, −' + t.off + ' USD']);
+        lines.push(['Total', t.total + ' USD']);
+        return lines;
       }
-      document.querySelectorAll('[data-reserve]').forEach(function (b) { b.addEventListener('click', function () { open(b.getAttribute('data-reserve')); }); });
-      if (location.hash.indexOf('#reservar-') === 0) open(location.hash.slice(10));
+      function summaryText() {
+        var e = form.elements;
+        return ['Reserva iTravelow'].concat(summaryLines().map(function (p) { return p[0] + ': ' + p[1]; }))
+          .concat(['Nombre: ' + e.nombre.value, 'WhatsApp: ' + e.whatsapp.value, 'Correo: ' + e.correo.value]).join('\n');
+      }
+      function openService(slug) { var s = svc(slug); if (s) openWith([{ slug: s.slug, option: s.options[0].id, date: '', rt: false }]); }
+      function openCombo(slug) {
+        var c = combos.filter(function (x) { return x.slug === slug; })[0]; if (!c) return;
+        openWith(c.items.map(function (i) { return { slug: i.service, option: i.option, date: '', rt: Boolean(i.roundTrip) }; }));
+      }
+      document.querySelectorAll('[data-reserve]').forEach(function (b) { b.addEventListener('click', function () { openService(b.getAttribute('data-reserve')); }); });
+      document.querySelectorAll('[data-combo]').forEach(function (b) { b.addEventListener('click', function () { openCombo(b.getAttribute('data-combo')); }); });
+      if (location.hash.indexOf('#reservar-combo-') === 0) openCombo(location.hash.slice(16));
+      else if (location.hash.indexOf('#reservar-') === 0) openService(location.hash.slice(10));
       dlg.querySelectorAll('[data-close]').forEach(function (b) { b.addEventListener('click', close); });
       dlg.addEventListener('cancel', function (e) { e.preventDefault(); close(); });
       dlg.addEventListener('click', function (e) { if (e.target === dlg) close(); });
-      q('[data-dec]').addEventListener('click', function () { if (state.pax > state.service.minPax) { state.pax--; render(); } });
-      q('[data-inc]').addEventListener('click', function () { if (state.pax < state.service.maxPax) { state.pax++; render(); } });
-      q('[data-rt] input').addEventListener('change', function (e) { state.rt = e.target.checked; render(); });
+      q('[data-dec]').addEventListener('click', function () { if (state.pax > 1) { state.pax--; renderTotals(); } });
+      q('[data-inc]').addEventListener('click', function () { if (state.pax < 20) { state.pax++; renderTotals(); } });
+      q('[data-rt] input').addEventListener('change', function (e) { state.items[state.editing].rt = e.target.checked; renderTotals(); });
+      q('[data-cancelitem]').addEventListener('click', function () { var it = state.items[state.editing]; if (!it.date) state.items.splice(state.editing, 1); state.backToCart = false; renderCart(); });
       q('[data-next]').addEventListener('click', function () {
-        var e = form.elements; var ok = e.fecha.value && e.hotel.value.trim().length > 1;
+        var it = state.items[state.editing]; var ok = Boolean(form.elements.fecha.value);
         q('[data-err1]').toggleAttribute('data-show', !ok); if (!ok) return;
-        var r = compute(); var sum = q('[data-summary]'); sum.innerHTML = '';
-        [['Servicio', state.service.name], ['Opción', optionLabel(r)], ['Fecha', e.fecha.value], ['Personas', state.pax], ['Hotel', e.hotel.value], ['Total', r.total + ' USD']]
-          .forEach(function (p) { var d = document.createElement('div'); d.innerHTML = '<span></span><span></span>'; d.children[0].textContent = p[0]; d.children[1].textContent = p[1]; sum.appendChild(d); });
-        goto(2);
+        it.date = form.elements.fecha.value;
+        if (state.backToCart) { state.backToCart = false; renderCart(); return; }
+        var nxt = -1; state.items.forEach(function (x, i) { if (nxt < 0 && !x.date) nxt = i; });
+        if (nxt >= 0) { state.editing = nxt; renderItem(); } else renderCart();
       });
-      q('[data-back]').addEventListener('click', function () { goto(1); });
+      q('[data-tocontact]').addEventListener('click', function () {
+        var ok = form.elements.hotel.value.trim().length > 1; q('[data-errcart]').toggleAttribute('data-show', !ok); if (!ok) return;
+        var sum = q('[data-summary]'); sum.innerHTML = '';
+        summaryLines().forEach(function (p) { var d = document.createElement('div'); d.innerHTML = '<span></span><span></span>'; d.children[0].textContent = p[0]; d.children[1].textContent = p[1]; sum.appendChild(d); });
+        goto('contact');
+      });
+      q('[data-back]').addEventListener('click', function () { renderCart(); });
       q('[data-pay]').addEventListener('click', function () {
         var e = form.elements; var ok = e.nombre.value.trim().length > 1 && e.whatsapp.value.replace(/\D/g, '').length >= 8 && /.+@.+\..+/.test(e.correo.value);
         q('[data-err2]').toggleAttribute('data-show', !ok); if (!ok) return;
@@ -632,9 +768,10 @@ const pending = PAYMENTS.provider === 'pending';
         try { localStorage.setItem('itravelow_reserva', text); } catch (err) {}
         if (pending) {
           q('[data-donemsg]').textContent = 'Si se abrió tu correo, solo envíalo. Si no, copia este resumen y mándalo a ' + EMAIL + '. Recibes el enlace de pago en menos de 1 hora.';
-          window.location.href = 'mailto:' + EMAIL + '?subject=' + encodeURIComponent('Reserva: ' + state.service.name) + '&body=' + encodeURIComponent(text);
+          var subj = state.items.map(function (it) { return svc(it.slug).name; }).join(' + ');
+          window.location.href = 'mailto:' + EMAIL + '?subject=' + encodeURIComponent('Reserva: ' + subj) + '&body=' + encodeURIComponent(text);
         }
-        goto(3);
+        goto('done');
       });
       q('[data-copy]').addEventListener('click', function () {
         var ta = q('[data-copytext]'); ta.select();
